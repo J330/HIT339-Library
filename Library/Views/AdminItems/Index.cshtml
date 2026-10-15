@@ -1,0 +1,70 @@
+@model IEnumerable<Item>
+
+@{
+    ViewData["Title"] = "Manage Items";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="mb-1">Manage Library Items</h1>
+        <p class="text-muted mb-0">Admin item management: create, read, edit and delete library items.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">Create New Item</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert alert-success" role="alert">@successMessage</div>
+}
+
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        There are no library items yet. Use <strong>Create New Item</strong> to add the first item.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Library Code</th>
+                    <th>Type</th><th>Branch</th>
+                    <th>Status</th>
+                    <th class="text-end">CRUD Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var itemType = item switch
+                    {
+                        Book => "Book",
+                        Music => "Music",
+                        Toy => "Toy",
+                        _ => "Item"
+                    };
+
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.LibraryCode</td>
+                        <td>@itemType</td><td>@item.Branch?.Name</td>
+                        <td>@item.Status</td>
+                        <td class="text-end text-nowrap">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Read / Details</a>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

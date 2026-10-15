@@ -1,0 +1,38 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.KioskAccountViewModel
+@{ Layout = "_Layout"; ViewData["Title"] = "My library account"; }
+@if (TempData["MemberRegistrationSuccess"] is string registrationMessage) { <div class="alert alert-success fs-5" role="status">@registrationMessage</div> }
+@if (TempData["KioskSuccess"] is string message) { <div class="alert alert-success fs-5" role="status">@message</div> }
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div><h1>Welcome, @Model.MemberName</h1><p class="lead mb-0">Membership @Model.MembershipCode</p><p class="text-muted mb-0">Username: @Model.Username</p></div>
+    <a asp-action="Checkout" class="btn btn-primary btn-lg kiosk-action">Scan item to borrow</a>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-sm-6"><div class="kiosk-stat"><strong>@Model.ActiveLoans.Count</strong><span>Active loans</span></div></div>
+    <div class="col-sm-6"><div class="kiosk-stat"><strong>@Model.RecordedFines.ToString("C")</strong><span>Recorded fines (payments not tracked)</span></div></div>
+</div>
+<h2 id="activeLoans">Your borrowed items</h2>
+<p class="text-muted">Current loans, their holding branches, and how long you have before they are due.</p>
+@if (Model.ActiveLoans.Count == 0) { <p class="lead">You don't currently have any items checked out.</p> }
+else
+{
+    <div class="table-responsive"><table class="table table-striped table-lg align-middle">
+        <thead><tr><th>Item</th><th>Holding branch</th><th>Borrowed</th><th>Due</th><th>Status</th></tr></thead>
+        <tbody>@foreach (var loan in Model.ActiveLoans)
+        {
+            <tr>
+                <td>@loan.ItemName</td><td>@loan.BranchName</td>
+                <td>@loan.BorrowDate.ToString("dd MMM yyyy")</td>
+                <td>@loan.DueDate.ToString("dd MMM yyyy")</td>
+                <td>
+                    @if (loan.DaysRemaining < 0) { <span class="badge text-bg-danger">@(-loan.DaysRemaining) day(s) overdue</span> }
+                    else if (loan.DaysRemaining == 0) { <span class="badge text-bg-warning">Due today</span> }
+                    else { <span class="badge @(loan.DaysRemaining <= 2 ? "text-bg-warning" : "text-bg-success")">@loan.DaysRemaining day(s) left</span> }
+                </td>
+            </tr>
+        }</tbody>
+    </table></div>
+}
+<div class="d-flex flex-wrap gap-3 mt-4">
+    <a asp-controller="MemberAccount" asp-action="Details" class="btn btn-outline-primary btn-lg">My contact details</a>
+    <a asp-controller="Reservations" asp-action="Index" class="btn btn-outline-primary btn-lg">My reservations</a>
+    <a asp-controller="Notifications" asp-action="Index" class="btn btn-outline-primary btn-lg">Notification calendar</a><a asp-action="Checkout" class="btn btn-primary btn-lg">Check out another item</a><a asp-action="ChangePassword" class="btn btn-outline-secondary btn-lg">Change password</a></div>

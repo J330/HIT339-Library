@@ -1,0 +1,18 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.KioskCheckoutViewModel
+@{ Layout = "_Layout"; ViewData["Title"] = "Check out an item"; }
+<div class="kiosk-panel mx-auto">
+    <h1>Check out an item</h1>
+    <p class="lead">Scan the item's library barcode. The standard loan period is 14 days.</p>
+    <form asp-action="Checkout" method="post" class="d-grid gap-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+        <div>
+            <label asp-for="LibraryCode" class="form-label"></label>
+            <input asp-for="LibraryCode" id="itemLibraryCode" autofocus class="form-control form-control-lg" autocomplete="off" />
+            <span asp-validation-for="LibraryCode" class="text-danger"></span>
+            <button type="button" class="btn btn-outline-secondary mt-2" data-camera-scan="itemLibraryCode">Scan with camera</button>
+        </div>
+        <div class="kiosk-camera" hidden><video playsinline muted></video><button type="button" class="btn btn-secondary" data-stop-camera>Close camera</button><p class="scan-message" role="status"></p></div>
+        <button type="submit" class="btn btn-primary btn-lg kiosk-action">Confirm checkout</button>
+        <a asp-action="Account" class="btn btn-outline-secondary btn-lg">Back to my account</a>
+    </form>
+</div>

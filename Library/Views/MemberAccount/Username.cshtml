@@ -1,0 +1,14 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.MemberUsernameViewModel
+@{ ViewData["Title"] = "Change username"; }
+<div class="row justify-content-center py-4"><div class="col-lg-6">
+    <h1>Change your username</h1>
+    <p class="text-muted">Sign in with your username, email or membership barcode. Changing your username does not change your membership barcode.</p>
+    @if (TempData["UsernameSaved"] is string success) { <div class="alert alert-success" role="status">@success</div> }
+    <form asp-action="Username" method="post" class="card card-body p-4">
+        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+        <div class="mb-3"><label asp-for="Username" class="form-label"></label><input asp-for="Username" class="form-control" autocomplete="username" /><span asp-validation-for="Username" class="text-danger"></span><div class="form-text">3–32 letters, numbers, dots, underscores or hyphens.</div></div>
+        <div class="mb-3"><label asp-for="CurrentPassword" class="form-label"></label><input asp-for="CurrentPassword" class="form-control" autocomplete="current-password" /><span asp-validation-for="CurrentPassword" class="text-danger"></span></div>
+        <div class="d-flex gap-2"><button class="btn btn-primary" type="submit">Save username</button><a class="btn btn-outline-secondary" asp-action="Details">Back to details</a></div>
+    </form>
+</div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

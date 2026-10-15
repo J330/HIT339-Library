@@ -1,0 +1,55 @@
+@model S379658_HIT339_Assignment2_Library.Models.Borrowing
+
+@{
+    ViewData["Title"] = "Borrowing Details";
+}
+
+<h1>Borrowing details</h1>
+@if (TempData["SuccessMessage"] is string successMessage) { <div class="alert alert-success">@successMessage</div> }
+@if (TempData["ErrorMessage"] is string errorMessage) { <div class="alert alert-danger">@errorMessage</div> }
+
+<div>
+    <h4>Borrowing</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Item</dt>
+        <dd class="col-sm-9">@Model.Item.Name</dd>
+
+        <dt class="col-sm-3">Library Code</dt>
+        <dd class="col-sm-9">@Model.Item.LibraryCode</dd>
+
+        <dt class="col-sm-3">Checkout method</dt>
+        <dd class="col-sm-9">@Model.Channel</dd>
+        <dt class="col-sm-3">Checkout branch</dt>
+<dd class="col-sm-9">@Model.CheckoutBranch.Name</dd>
+<dt class="col-sm-3">Return branch</dt>
+<dd class="col-sm-9">@(Model.ReturnBranch?.Name ?? "—")</dd>
+<dt class="col-sm-3">Borrower</dt>
+        <dd class="col-sm-9">
+            <a asp-controller="Borrowers" asp-action="Details" asp-route-id="@Model.BorrowerId">
+                @Model.Borrower.FirstName @Model.Borrower.LastName
+            </a>
+        </dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.BorrowDate)</dt>
+        <dd class="col-sm-9">@Model.BorrowDate.ToShortDateString()</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.DueDate)</dt>
+        <dd class="col-sm-9">@Model.DueDate.ToShortDateString()</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ReturnDate)</dt>
+        <dd class="col-sm-9">@(Model.ReturnDate?.ToShortDateString() ?? "Not returned")</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FineAmount)</dt>
+        <dd class="col-sm-9">@Model.FineAmount.ToString("C")</dd>
+    </dl>
+</div>
+
+<div>
+    @if (Model.ReturnDate == null)
+    {
+        <a asp-action="Return" asp-route-libraryCode="@Model.Item.LibraryCode" class="btn btn-success">Return Item</a>
+        <a asp-action="EditDueDate" asp-route-id="@Model.Id" class="btn btn-outline-primary">Change due date</a>
+    }
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

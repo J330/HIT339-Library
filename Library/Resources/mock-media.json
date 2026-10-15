@@ -1,0 +1,6 @@
+[
+  { "Type": "Book", "LibraryCode": "DEMO-B001", "Name": "Introduction to Astronomy", "Description": "Beginner astronomy reference", "Author": "Sample Author", "Genre": "Science" },
+  { "Type": "Book", "LibraryCode": "DEMO-B002", "Name": "Garden Ecology", "Description": "Understanding local ecosystems", "Author": "Example Writer", "Genre": "Nature" },
+  { "Type": "Music", "LibraryCode": "DEMO-M001", "Name": "Library Jazz Collection", "Description": "Instrumental jazz album", "Artist": "Sample Quartet", "Genre": "Jazz", "Year": "2022" },
+  { "Type": "Toy", "LibraryCode": "DEMO-T001", "Name": "Wooden Shape Puzzle", "Description": "Early childhood learning puzzle", "ToyType": "Puzzle", "MinimumAge": "3" }
+]

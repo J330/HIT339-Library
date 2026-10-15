@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Library Management System</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @if (ViewContext.RouteData.Values["controller"]?.ToString() == "Kiosk")
+    {
+        <link rel="stylesheet" href="~/css/kiosk.css" asp-append-version="true" />
+    }
+</head>
+<body>
+@{
+    var isKiosk = ViewContext.RouteData.Values["controller"]?.ToString() == "Kiosk";
+    var isBorrower = User.IsInRole("Borrower");
+    var isAdmin = User.IsInRole("Admin");
+    var isManager = User.IsInRole("Manager");
+    var isReception = User.IsInRole("Reception");
+    var signedIn = User.Identity?.IsAuthenticated == true;
+    var staff = isAdmin || isManager || isReception;
+}
+<a class="skip-link" href="#mainContent">Skip to main content</a>
+<header>
+    <nav class="navbar navbar-expand-xl bg-light border-bottom shadow-sm mb-3 library-navbar" aria-label="Main navigation">
+        <div class="container-fluid px-3 px-xxl-4">
+            <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">Library <span class="d-none d-sm-inline fw-normal">Management</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                    aria-controls="mainNavbar" aria-expanded="false" aria-label="Open navigation menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav me-auto gap-xl-1 mb-3 mb-xl-0">
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Catalogue" asp-action="Index">Catalogue</a></li>
+                    <li class="nav-item dropdown">
+                        <button class="nav-link dropdown-toggle btn btn-link text-decoration-none" type="button" id="publicMenu"
+                                data-bs-toggle="dropdown" aria-expanded="false">Explore</button>
+                        <ul class="dropdown-menu" aria-labelledby="publicMenu">
+                            @if (!staff)
+                            {
+                                <li><a class="dropdown-item" asp-controller="Kiosk" asp-action="Index">Self-service kiosk</a></li>
+                            }
+                            <li><a class="dropdown-item" asp-controller="Developers" asp-action="Index">Public API</a></li>
+                        </ul>
+                    </li>
+                    @if (isBorrower)
+                    {
+                        <li class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle btn btn-link text-decoration-none" type="button" id="memberMenu"
+                                    data-bs-toggle="dropdown" aria-expanded="false">My library</button>
+                            <ul class="dropdown-menu" aria-labelledby="memberMenu">
+                                <li><a class="dropdown-item" asp-controller="Kiosk" asp-action="Account">My account</a></li>
+                                <li><a class="dropdown-item" asp-controller="Kiosk" asp-action="Account" asp-fragment="activeLoans">My borrowed items</a></li>
+                                <li><a class="dropdown-item" asp-controller="MemberAccount" asp-action="Details">Contact details</a></li>
+                                <li><a class="dropdown-item" asp-controller="Reservations" asp-action="Index">My reservations</a></li>
+                                <li><a class="dropdown-item" asp-controller="Notifications" asp-action="Index">Notification calendar</a></li>
+                            </ul>
+                        </li>
+                    }
+                    @if (isAdmin || isReception)
+                    {
+                        <li class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle btn btn-link text-decoration-none" type="button" id="operationsMenu"
+                                    data-bs-toggle="dropdown" aria-expanded="false">Staff operations</button>
+                            <ul class="dropdown-menu" aria-labelledby="operationsMenu">
+                                @if (isAdmin)
+                                {
+                                    <li><a class="dropdown-item" asp-controller="AdminItems" asp-action="Index">Manage inventory</a></li>
+                                }
+                                <li><a class="dropdown-item" asp-controller="Imports" asp-action="Search">Search external media</a></li>
+                                <li><a class="dropdown-item" asp-controller="Imports" asp-action="Index">CSV and mock imports</a></li>
+                                <li><a class="dropdown-item" asp-controller="Borrowers" asp-action="Index">Borrower records</a></li>
+                                <li><a class="dropdown-item" asp-controller="Borrowing" asp-action="Index">Borrowing and returns</a></li>
+                                <li><a class="dropdown-item" asp-controller="Transfers" asp-action="Index">Item transfers</a></li>
+                                <li><a class="dropdown-item" asp-controller="Reservations" asp-action="Index">Reservations</a></li>
+                                <li><a class="dropdown-item" asp-controller="Notifications" asp-action="Index">Notification calendar</a></li>
+                                @if (isReception)
+                                {
+                                    <li><a class="dropdown-item" asp-controller="Payments" asp-action="Index">Fine payments</a></li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                    @if (isAdmin || isManager)
+                    {
+                        <li class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle btn btn-link text-decoration-none" type="button" id="managementMenu"
+                                    data-bs-toggle="dropdown" aria-expanded="false">Management</button>
+                            <ul class="dropdown-menu" aria-labelledby="managementMenu">
+                                <li><a class="dropdown-item" asp-controller="Branches" asp-action="Index">Branch Management</a></li>
+                                <li><a class="dropdown-item" asp-controller="Branches" asp-action="Create">Create a branch</a></li>
+                                @if (isManager)
+                                {
+                                    <li><a class="dropdown-item" asp-controller="Borrowing" asp-action="Index">Borrowing and returns</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Borrowers" asp-action="Index">Borrower records</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Imports" asp-action="Search">Search external media</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Imports" asp-action="Index">CSV and mock imports</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Managers" asp-action="Index">Dashboard</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Reports" asp-action="Index">Reports and exports</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Payments" asp-action="Index">Fine payments</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Notifications" asp-action="Index">Notification calendar</a></li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                </ul>
+                <div class="d-flex flex-wrap align-items-center gap-2 nav-account-actions">
+                    @if (staff)
+                    {
+                        <a class="btn btn-outline-primary btn-sm" asp-controller="Downloads" asp-action="Index">Staff app download</a>
+                    }
+                    @if (signedIn)
+                    {
+                        <span class="nav-user-label" title="Signed in account">@User.Identity?.Name</span>
+                        <form id="@(isBorrower && ViewContext.RouteData.Values["controller"]?.ToString() == "Kiosk" ? "kioskLogout" : null)"
+                              asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">Sign out</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a class="btn btn-outline-primary btn-sm" asp-controller="Kiosk" asp-action="Login">Member sign in</a>
+                        <a class="btn btn-primary btn-sm" asp-controller="MemberAccount" asp-action="Register">Create account</a>
+                        <a class="btn btn-outline-secondary btn-sm" asp-controller="Account" asp-action="Login">Staff sign in</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+<div class="@(isKiosk ? "container kiosk-main" : "container")">
+    <main id="mainContent" role="main" class="pb-3" tabindex="-1">@RenderBody()</main>
+</div>
+<footer class="border-top footer text-muted mt-4">
+    <div class="container py-3">&copy; 2026 - Library Management System</div>
+</footer>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@if (ViewContext.RouteData.Values["controller"]?.ToString() == "Kiosk")
+{
+    <script src="~/js/kiosk.js" asp-append-version="true"></script>
+}
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

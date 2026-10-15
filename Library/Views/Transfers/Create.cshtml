@@ -1,0 +1,11 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.TransferRequestViewModel
+@{ ViewData["Title"] = "Request transfer"; }
+<h1>Request an inter-branch transfer</h1><p>Only available or damaged copies without reservations can be transferred.</p>
+<form asp-action="Create" method="post" class="col-md-7">
+ <div asp-validation-summary="All" class="text-danger"></div>
+ <div class="mb-3"><label asp-for="ItemId" class="form-label">Physical copy</label><select asp-for="ItemId" asp-items="ViewBag.ItemId" class="form-select"><option value="0">Select copy</option></select></div>
+ <div class="mb-3"><label asp-for="DestinationBranchId" class="form-label">Destination branch</label><select asp-for="DestinationBranchId" asp-items="ViewBag.DestinationBranchId" class="form-select"><option value="0">Select destination</option></select></div>
+ <div class="mb-3"><label asp-for="Notes" class="form-label"></label><textarea asp-for="Notes" class="form-control"></textarea></div>
+ <button class="btn btn-primary">Request transfer</button> <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

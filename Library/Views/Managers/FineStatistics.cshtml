@@ -1,0 +1,34 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.FineStatisticsViewModel
+
+@{
+    ViewData["Title"] = "Fine Statistics";
+}
+
+<h1>Fine Statistics</h1>
+<p class="text-muted">Recorded fines are created when late items are returned. Current overdue estimates use the existing $1.00 per late day rule.</p>
+
+<table class="table table-striped table-bordered mt-4">
+    <thead>
+        <tr>
+            <th>Statistic</th>
+            <th class="text-end">Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>Total fines charged</td><td class="text-end">@Model.TotalFinesCharged.ToString("C")</td></tr>
+        <tr><td>Total payments received</td><td class="text-end">@Model.TotalPaymentsReceived.ToString("C")</td></tr>
+        <tr><td>Outstanding fine balance</td><td class="text-end">@Model.OutstandingFineBalance.ToString("C")</td></tr>
+        <tr><td>Returned borrowings with a fine</td><td class="text-end">@Model.BorrowingsWithFines</td></tr>
+        <tr><td>Average charged fine</td><td class="text-end">@Model.AverageFine.ToString("C")</td></tr>
+        <tr><td>Highest charged fine</td><td class="text-end">@Model.HighestFine.ToString("C")</td></tr>
+        <tr><td>Items currently overdue</td><td class="text-end">@Model.CurrentOverdueItems</td></tr>
+        <tr><td>Estimated fines on current overdue items</td><td class="text-end">@Model.EstimatedCurrentOverdueFines.ToString("C")</td></tr>
+    </tbody>
+</table>
+
+<div class="alert alert-info">
+    Estimated overdue fines are not stored as charged fines until an item is returned.
+</div>
+
+<p><a asp-controller="Payments" asp-action="Index" class="btn btn-outline-primary">Record and review fine payments</a></p>
+<a asp-action="Index" class="btn btn-secondary">Back to Manager Dashboard</a>

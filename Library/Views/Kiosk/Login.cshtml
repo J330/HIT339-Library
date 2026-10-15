@@ -1,0 +1,23 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.KioskLoginViewModel
+@{ Layout = "_Layout"; ViewData["Title"] = "Member login"; }
+<div class="kiosk-panel mx-auto">
+    <h1>Member sign in</h1>
+    <p class="lead">Enter your username, email address or membership barcode, then your password. You can still scan your membership barcode.</p>
+    <form asp-action="Login" method="post" class="d-grid gap-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+        <div>
+            <label asp-for="MembershipCode" class="form-label"></label>
+            <input asp-for="MembershipCode" class="form-control form-control-lg" id="membershipCode" autofocus autocomplete="username" />
+            <span asp-validation-for="MembershipCode" class="text-danger"></span>
+            <button type="button" class="btn btn-outline-secondary mt-2" data-camera-scan="membershipCode">Scan with camera</button>
+        </div>
+        <div>
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" class="form-control form-control-lg" autocomplete="current-password" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <div class="kiosk-camera" hidden><video playsinline muted></video><button type="button" class="btn btn-secondary" data-stop-camera>Close camera</button><p class="scan-message" role="status"></p></div>
+        <button type="submit" class="btn btn-primary btn-lg kiosk-action">Sign in securely</button>
+    </form>
+    <p class="mt-4 text-muted">First visit? <a asp-controller="MemberAccount" asp-action="Register">Create a borrower account</a>, or use your reception-issued password and then change it.</p>
+</div>

@@ -1,0 +1,29 @@
+@{
+    ViewData["Title"] = "Developer API";
+}
+<section class="py-4">
+    <h1>Public catalogue API</h1>
+    <p class="lead">A read-only JSON API for catalogue entries, categories and service availability. Borrower profiles, memberships, loans and fine records are never published.</p>
+    <p>These endpoints require no API key for public catalogue access and are rate-limited. All endpoints support <strong>GET only</strong>.</p>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead><tr><th>Endpoint</th><th>Purpose</th><th>Try it</th></tr></thead>
+            <tbody>
+                <tr><td><code>GET /api/catalogue/items</code></td><td>Paginated search and item availability</td><td><a href="/api/catalogue/items" target="_blank" rel="noopener">View JSON</a></td></tr>
+                <tr><td><code>GET /api/catalogue/items/1</code></td><td>One catalogue item by ID</td><td><a href="/api/catalogue/items/1" target="_blank" rel="noopener">View JSON</a></td></tr>
+                <tr><td><code>GET /api/catalogue/categories</code></td><td>Book/music genres and toy types</td><td><a href="/api/catalogue/categories" target="_blank" rel="noopener">View JSON</a></td></tr>
+                <tr><td><code>GET /api/catalogue/status</code></td><td>API service status and branch opening hours</td><td><a href="/api/catalogue/status" target="_blank" rel="noopener">View JSON</a></td></tr>
+                <tr><td><code>GET /api/catalogue/branches</code></td><td>Available branches and hours</td><td><a href="/api/catalogue/branches" target="_blank" rel="noopener">View JSON</a></td></tr>
+            </tbody>
+        </table>
+    </div>
+    <h2 class="h4 mt-4">Query examples</h2>
+    <p><code>/api/catalogue/items?search=history&amp;type=Book&amp;availability=Available&amp;page=1&amp;pageSize=20</code></p>
+    <p><code>/api/catalogue/items?category=Fiction&amp;branchId=1&amp;page=1&amp;pageSize=10</code></p>
+    <p><code>/api/catalogue/items?search=tolkien</code> (matches titles, descriptions, authors, artists, and genres)</p>
+    <p>Supported query fields: <code>search</code>, <code>type</code> (Book, Music, Toy), <code>category</code>, <code>availability</code>, <code>branchId</code>, <code>page</code> and <code>pageSize</code> (up to 50).</p>
+    <h2 class="h4 mt-4">Implementation references</h2>
+    <p><a href="https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-web-api" target="_blank" rel="noopener noreferrer">Microsoft ASP.NET Core Web API tutorial</a> &middot;
+       <a href="https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit" target="_blank" rel="noopener noreferrer">Rate limiting</a> &middot;
+       <a href="https://learn.microsoft.com/en-us/aspnet/core/security/authorization/roles" target="_blank" rel="noopener noreferrer">Role-based authorization</a></p>
+</section>

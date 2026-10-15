@@ -1,0 +1,15 @@
+@model IEnumerable<Reservation>
+@{ ViewData["Title"] = "Reservations and waitlist"; var staff = !User.IsInRole("Borrower"); }
+<h1>@(staff ? "Reservations and waitlist – staff view" : "My reservations")</h1>
+<p>Queue order: first requested, first served. A ready hold lasts three days before the next person is notified.</p>
+@if (TempData["SuccessMessage"] is string success) { <div class="alert alert-success">@success</div> }
+@if (TempData["ErrorMessage"] is string error) { <div class="alert alert-warning">@error</div> }
+<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Item / branch</th>@if(staff) { <th>Borrower</th> }<th>Requested (UTC)</th><th>Status</th><th>Collect by (UTC)</th><th></th></tr></thead><tbody>
+@foreach (var hold in Model) { <tr><td>@hold.Item.Name (@hold.Item.LibraryCode) – @hold.Item.Branch?.Name</td>
+@if(staff) { <td>@hold.Borrower.FirstName @hold.Borrower.LastName</td> }
+<td>@hold.PlacedAtUtc.ToString("dd MMM yyyy HH:mm")</td><td>@hold.Status</td><td>@(hold.ExpiresAtUtc?.ToString("dd MMM yyyy HH:mm") ?? "—")</td>
+<td>@if(hold.Status == ReservationStatus.Ready || hold.Status == ReservationStatus.Pending) {
+<form asp-action="Cancel" asp-route-id="@hold.Id" method="post"><button class="btn btn-sm btn-outline-danger">Cancel</button></form>
+}</td></tr> }
+</tbody></table></div>
+@if(!staff) { <a asp-controller="Catalogue" asp-action="Index" class="btn btn-primary">Find more items</a> }

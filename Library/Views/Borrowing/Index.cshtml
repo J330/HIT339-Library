@@ -1,0 +1,76 @@
+@model IEnumerable<S379658_HIT339_Assignment2_Library.Models.Borrowing>
+
+@{
+    ViewData["Title"] = "Borrowing";
+}
+
+<h1>Borrowing</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<p>
+    <a asp-action="Borrow" class="btn btn-primary">Borrow Item</a>
+    <a asp-action="Return" class="btn btn-success">Return Item</a>
+    <a asp-controller="Borrowers" asp-action="Index" class="btn btn-secondary">Manage Borrowers</a>
+</p>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Library Code</th><th>Checkout branch</th>
+            <th>Borrower</th>
+            <th>Checkout method</th>
+            <th>Borrow Date</th>
+            <th>Due Date</th>
+            <th>Return Date</th>
+            <th>Fine</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model)
+{
+        var overdue = item.ReturnDate == null && item.DueDate.Date < DateTime.Today;
+        <tr>
+            <td>@item.Item.Name</td>
+            <td>@item.Item.LibraryCode</td><td>@item.CheckoutBranch.Name</td>
+            <td>@item.Borrower.FirstName @item.Borrower.LastName</td>
+            <td><span class="badge @(item.Channel == S379658_HIT339_Assignment2_Library.Models.CheckoutChannel.Online ? "text-bg-info" : "text-bg-light border")">@item.Channel</span></td>
+            <td>@item.BorrowDate.ToShortDateString()</td>
+            <td>@item.DueDate.ToShortDateString()</td>
+            <td>@(item.ReturnDate?.ToShortDateString() ?? "-")</td>
+            <td>@item.FineAmount.ToString("C")</td>
+            <td>
+                @if (item.ReturnDate != null)
+                {
+                    <span class="badge bg-secondary">Returned</span>
+                }
+                else if (overdue)
+                {
+                    <span class="badge bg-danger">Overdue</span>
+                }
+                else
+                {
+                    <span class="badge bg-primary">Borrowed</span>
+                }
+            </td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                @if (item.ReturnDate == null)
+                {
+                    <a asp-action="EditDueDate" asp-route-id="@item.Id" class="ms-2">Edit due date</a>
+                }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

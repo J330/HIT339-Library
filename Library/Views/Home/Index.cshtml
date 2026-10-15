@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<section class="py-4 py-md-5">
+    <div class="row align-items-center g-4">
+        <div class="col-12 col-lg-7">
+            <span class="badge text-bg-primary mb-3">Library Management System</span>
+            <h1 class="display-5 fw-semibold">Search the library from anywhere</h1>
+            <p class="lead text-muted">
+                Members of the public can search available books, music and toys online from a phone, tablet or computer. No login is required to browse the catalogue.
+            </p>
+            <div class="d-grid d-sm-flex gap-2 mt-4 flex-wrap">
+                <a asp-controller="Catalogue"
+                   asp-action="Index"
+                   class="btn btn-primary btn-lg px-4">
+                    Search Catalogue
+                </a>
+
+                @if (!User.IsInRole("Admin") && !User.IsInRole("Manager") && !User.IsInRole("Reception"))
+                {
+                    <a asp-controller="Kiosk" asp-action="Index" class="btn btn-success btn-lg px-4">Self-Service Kiosk</a>
+                }
+                <a asp-controller="Developers" asp-action="Index" class="btn btn-outline-primary btn-lg px-4">Developer API</a>
+                @if (User.Identity?.IsAuthenticated != true)
+                {
+                    <a asp-controller="MemberAccount" asp-action="Register" class="btn btn-outline-primary btn-lg px-4">Create borrower account</a>
+                    <a asp-controller="Account"
+                       asp-action="Login"
+                       class="btn btn-outline-secondary btn-lg px-4">Staff Login</a>
+                }
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+            <div class="card shadow-sm border-0 catalogue-search-card">
+                <div class="card-body p-4">
+                    <h2 class="h4">Public catalogue</h2>
+                    <p class="text-muted">Search by item name, library code or description, then filter by type or current status.</p>
+                    <form asp-controller="Catalogue" asp-action="Index" method="get" class="d-grid gap-2">
+                        <label for="homeSearch" class="form-label fw-semibold mb-0">Quick search</label>
+                        <input id="homeSearch"
+                               name="searchString"
+                               class="form-control form-control-lg"
+                               placeholder="What are you looking for?" />
+                        <button class="btn btn-primary btn-lg" type="submit">Search</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

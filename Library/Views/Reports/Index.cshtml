@@ -1,0 +1,48 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.ReportPageViewModel
+@using S379658_HIT339_Assignment2_Library.ViewModels
+@{
+    ViewData["Title"] = "Manager Reports";
+}
+<h1>Manager reports and export</h1>
+<p class="text-muted">Filter borrowing or fine activity by date and branch. Inventory shows the current branch snapshot.</p>
+<form asp-action="Index" method="get" class="card card-body shadow-sm mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label asp-for="Type" class="form-label">Report</label>
+            <select asp-for="Type" asp-items="Html.GetEnumSelectList<ManagerReportType>()" class="form-select"></select>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="BranchId" class="form-label">Branch</label>
+            <select asp-for="BranchId" asp-items="ViewBag.Branches" class="form-select"><option value="">All branches</option></select>
+        </div>
+        <div class="col-md-2">
+            <label asp-for="From" class="form-label">From</label>
+            <input asp-for="From" type="date" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label asp-for="To" class="form-label">To</label>
+            <input asp-for="To" type="date" class="form-control" />
+        </div>
+        <div class="col-md-2"><button class="btn btn-primary w-100">View report</button></div>
+    </div>
+</form>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+    <h2 class="h4 mb-0">@Model.Table.Title</h2>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-success" asp-action="Export" asp-route-type="@Model.Type" asp-route-branchId="@Model.BranchId" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))" asp-route-format="csv">Download CSV</a>
+        <a class="btn btn-outline-danger" asp-action="Export" asp-route-type="@Model.Type" asp-route-branchId="@Model.BranchId" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))" asp-route-format="pdf">Download PDF</a>
+    </div>
+</div>
+<p class="small text-muted">@Model.Table.Note</p>
+<div class="table-responsive">
+<table class="table table-bordered table-striped">
+    <thead><tr>@foreach (var column in Model.Table.Columns) { <th scope="col">@column</th> }</tr></thead>
+    <tbody>
+        @foreach (var row in Model.Table.Rows)
+        {
+            <tr>@foreach (var cell in row) { <td>@cell</td> }</tr>
+        }
+    </tbody>
+</table>
+</div>
+<a asp-controller="Managers" asp-action="Index" class="btn btn-secondary">Back to manager dashboard</a>

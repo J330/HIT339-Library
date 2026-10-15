@@ -1,0 +1,10 @@
+@{ Layout = "_Layout"; ViewData["Title"] = "Welcome"; }
+<section class="text-center py-4">
+    <h1 class="display-4 fw-bold">Welcome to the library kiosk</h1>
+    <p class="lead text-muted">Use your username, email or membership barcode and password to view your loans or check out a book, music item or toy.</p>
+    <div class="row g-4 mt-4 justify-content-center">
+        <div class="col-md-6"><a asp-action="Login" class="kiosk-tile w-100 d-block"><span class="kiosk-emoji">🔖</span><strong>Member sign in</strong><small>Use a username, email or scan your code</small></a></div>
+        <div class="col-md-6"><a asp-controller="Catalogue" asp-action="Index" class="kiosk-tile w-100 d-block"><span class="kiosk-emoji">📚</span><strong>Search catalogue</strong><small>No login needed to browse items</small></a></div>
+    </div>
+    <p class="mt-5 text-muted">New member? <a asp-controller="MemberAccount" asp-action="Register">Create an account online</a>. If reception already created your record, ask them to activate your existing membership.</p>
+</section>

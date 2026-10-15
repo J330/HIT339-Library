@@ -1,0 +1,84 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.ReturnItemViewModel
+
+@{
+    ViewData["Title"] = "Return Item";
+}
+
+<h1>Return Item</h1>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <form asp-action="Return" method="get">
+            <label class="form-label" for="libraryCode">Library Code</label>
+            <div class="input-group">
+                <input id="libraryCode"
+                       name="libraryCode"
+                       value="@Model.LibraryCode"
+                       class="form-control"
+                       placeholder="e.g. BK001" />
+                <button type="submit" class="btn btn-primary">Find Borrowing</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (ViewData["ReturnError"] != null)
+{
+    <div class="alert alert-danger">@ViewData["ReturnError"]</div>
+}
+
+@if (Model.BorrowingId > 0)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h4 class="card-title">@Model.ItemName</h4>
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Library Code</dt>
+                <dd class="col-sm-9">@Model.LibraryCode</dd>
+
+                <dt class="col-sm-3">Borrower</dt>
+                <dd class="col-sm-9">@Model.BorrowerName</dd>
+
+                <dt class="col-sm-3">Due Date</dt>
+                <dd class="col-sm-9">@Model.DueDate.ToShortDateString()</dd>
+
+                <dt class="col-sm-3">Estimated Fine Today</dt>
+                <dd class="col-sm-9">@Model.EstimatedFine.ToString("C")</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Return" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <input type="hidden" asp-for="BorrowingId" />
+                <input type="hidden" asp-for="LibraryCode" />
+                <input type="hidden" asp-for="ItemName" />
+                <input type="hidden" asp-for="BorrowerName" />
+                <input type="hidden" asp-for="DueDate" />
+
+                <div class="form-group mb-3">
+                    <label asp-for="ReturnDate" class="control-label"></label>
+                    <input asp-for="ReturnDate" class="form-control" />
+                    <span asp-validation-for="ReturnDate" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3"><label asp-for="ReturnBranchId" class="form-label"></label>
+                <select asp-for="ReturnBranchId" asp-items="ViewBag.BranchId" class="form-select"><option value="0">-- Select receiving branch --</option></select>
+                <span asp-validation-for="ReturnBranchId" class="text-danger"></span></div>
+                <button type="submit" class="btn btn-success">Confirm Return</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+}
+else
+{
+    <p class="text-muted">Enter a library code above to find the active borrowing record.</p>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Staff downloads";
+    bool packageReady = ViewBag.PackageReady is true;
+}
+<section class="py-4">
+    <h1 class="h2">Staff application downloads</h1>
+    <p class="text-muted">Install the library client on a Windows PC or virtual machine. It connects to this library's secure cloud website—no local database or server installation is required.</p>
+    <div class="card shadow-sm" style="max-width: 720px">
+        <div class="card-body">
+            <h2 class="h5">Library Desktop — Windows x64</h2>
+            <p>Download the portable package, extract it, then run <code>LibraryDesktopClient.exe</code>. Keep the files together and use a Windows device with the Microsoft Edge WebView2 Runtime installed.</p>
+            @if (packageReady)
+            {
+                <a class="btn btn-primary" asp-controller="Downloads" asp-action="Windows">Download Windows application (.zip)</a>
+            }
+            else
+            {
+                <div class="alert alert-secondary mb-0" role="status">The Windows application hasn't been published yet. An administrator must build and upload the package to the server's protected downloads folder.</div>
+            }
+        </div>
+    </div>
+    <p class="small text-muted mt-3">Only signed-in Admin, Manager and Reception users can open this page or download the package. Accounts and inventory remain on the cloud server.</p>
+</section>

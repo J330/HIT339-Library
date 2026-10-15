@@ -1,0 +1,308 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.NotificationCalendarViewModel
+@{
+    ViewData["Title"] = "Notification calendar";
+    var previous = Model.Month.AddMonths(-1).ToString("yyyy-MM");
+    var next = Model.Month.AddMonths(1).ToString("yyyy-MM");
+    var today = DateTime.Today;
+    var weekdayNames = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+    <div><h1>@(Model.StaffView ? "Notification calendar" : "My library calendar")</h1>
+        <p class="text-muted mb-0">Loan due dates, reservations, recorded fine payments, events, and simulated notifications. Select a day to manage it.</p></div>
+    @if (Model.StaffView)
+    {
+        <form asp-action="RunChecks" method="post"><button type="submit" class="btn btn-primary">Run notification checks now</button></form>
+    }
+</div>
+@if (TempData["SuccessMessage"] is string success) { <div class="alert alert-success" role="status">@success</div> }
+@if (TempData["ErrorMessage"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
+<p class="small text-muted">This is a simulator: no real emails or text messages are sent. Calendar dates are shown in the library server's local timezone.</p>
+<section class="card mb-4 notification-calendar-card" aria-labelledby="calendarTitle">
+    <div class="card-header bg-white d-flex justify-content-between flex-wrap align-items-center gap-2 py-3">
+        <h2 class="h4 mb-0" id="calendarTitle">@Model.Month.ToString("MMMM yyyy")</h2>
+        <div class="btn-group" role="group" aria-label="Calendar month navigation">
+            <a class="btn btn-outline-secondary" asp-action="Index" asp-route-month="@previous" aria-label="Previous month">&larr; Previous</a>
+            <a class="btn btn-outline-secondary" asp-action="Index">Today</a>
+            <a class="btn btn-outline-secondary" asp-action="Index" asp-route-month="@next" aria-label="Next month">Next &rarr;</a>
+        </div>
+    </div>
+    <div class="card-body pb-2">
+        <div class="d-flex flex-wrap gap-3 mb-3 calendar-legend" aria-label="Calendar legend">
+            <span><span class="calendar-legend-dot event-due"></span> Due date</span>
+            <span><span class="calendar-legend-dot event-reminder"></span> Scheduled reminder</span>
+            <span><span class="calendar-legend-dot event-hold"></span> Hold deadline</span>
+            <span><span class="calendar-legend-dot event-notification"></span> Logged notification</span>
+            <span><span class="calendar-legend-dot event-event"></span> Event</span>
+            <span><span class="calendar-legend-dot event-followup"></span> Reservation follow-up</span>
+            <span><span class="calendar-legend-dot event-scheduled"></span> Scheduled notification</span>
+            <span><span class="calendar-legend-dot event-payment"></span> Fine payment received</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered notification-calendar" aria-label="Notifications and events for @Model.Month.ToString("MMMM yyyy")">
+                <thead><tr>@foreach (var name in weekdayNames) { <th scope="col" class="text-center">@name</th> }</tr></thead>
+                <tbody>
+                    @for (int week = 0; week < 6; week++)
+                    {
+                        <tr>
+                            @for (int weekday = 0; weekday < 7; weekday++)
+                            {
+                                var cell = Model.Days[week * 7 + weekday];
+                                var cellClasses = "calendar-day" + (cell.InMonth ? "" : " other-month")
+                                    + (cell.Date == today ? " today" : "")
+                                    + (cell.Date == Model.SelectedDate ? " selected-day" : "");
+                                <td class="@cellClasses">
+                                    <a asp-action="Index" asp-route-month="@Model.Month.ToString("yyyy-MM")" asp-route-day="@cell.Date.ToString("yyyy-MM-dd")" asp-fragment="dayEvents"
+                                       class="calendar-date-link" aria-label="View @cell.Date.ToString("dddd d MMMM yyyy") events (@cell.Events.Count)">@cell.Date.Day</a>
+                                    @foreach (var evt in cell.Events.Take(3))
+                                    {
+                                        <a class="calendar-event event-@evt.Kind" title="@evt.Details" asp-action="Index"
+                                           asp-route-month="@Model.Month.ToString("yyyy-MM")" asp-route-day="@cell.Date.ToString("yyyy-MM-dd")" asp-fragment="dayEvents">@evt.Title</a>
+                                    }
+                                    @if (cell.Events.Count > 3)
+                                    {
+                                        <a class="calendar-more" asp-action="Index" asp-route-month="@Model.Month.ToString("yyyy-MM")"
+                                           asp-route-day="@cell.Date.ToString("yyyy-MM-dd")" asp-fragment="dayEvents">+@(cell.Events.Count - 3) more</a>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+<section class="card mb-4" id="dayEvents" aria-labelledby="selectedDayTitle">
+    <div class="card-body">
+        <h2 class="h4" id="selectedDayTitle">@Model.SelectedDate.ToString("dddd, dd MMMM yyyy")</h2>
+        @if (Model.SelectedEvents.Count == 0)
+        { <p class="text-muted mb-0">No scheduled library events or logged notifications for this date.</p> }
+        else
+        {
+            <ul class="list-group list-group-flush">
+                @foreach (var evt in Model.SelectedEvents)
+                {
+                    <li class="list-group-item px-0"><span class="calendar-detail-kind event-@evt.Kind">@evt.Kind</span>
+                        <strong>@evt.Title</strong>
+                        @if (Model.StaffView && evt.Borrower is not null) { <span class="small text-muted">— @evt.Borrower</span> }
+                        <p class="mb-0 small mt-1">@evt.Details</p>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</section>
+<section class="card mb-4" id="createDayEntry" aria-labelledby="createDayTitle">
+    <div class="card-body">
+        <h2 class="h4" id="createDayTitle">Create something for @Model.SelectedDate.ToString("dd MMMM yyyy")</h2>
+        <p class="small text-muted">A selected date can hold an event, a reservation follow-up, or a future simulated notification. Reservations enter the queue immediately, and follow-up dates do not guarantee availability.</p>
+        <div class="row g-3">
+            <div class="col-lg-4">
+                <details class="border rounded p-3 h-100 calendar-editor" open>
+                    <summary class="fw-semibold mb-2">New calendar event</summary>
+                    <form asp-action="CreateEvent" method="post" class="d-grid gap-2">
+                        <input type="hidden" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+                        <label for="eventTitle" class="form-label mb-0">Title</label>
+                        <input id="eventTitle" name="title" class="form-control" maxlength="120" required placeholder="Library visit / event" />
+                        <label for="eventDesc" class="form-label mb-0">Notes (optional)</label>
+                        <textarea id="eventDesc" name="description" maxlength="800" rows="2" class="form-control"></textarea>
+                        @if (Model.StaffView)
+                        {
+                            <fieldset class="border rounded p-2">
+                                <legend class="fs-6 fw-semibold mb-2">Visible to (choose one or more)</legend>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="visibleToRoles" value="Admin" id="eventRoleAdmin" />
+                                    <label class="form-check-label" for="eventRoleAdmin">Administrators</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="visibleToRoles" value="Manager" id="eventRoleManager" />
+                                    <label class="form-check-label" for="eventRoleManager">Managers (all manager accounts)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="visibleToRoles" value="Reception" id="eventRoleReception" />
+                                    <label class="form-check-label" for="eventRoleReception">Reception staff</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="visibleToRoles" value="Borrower" id="eventRoleBorrower" />
+                                    <label class="form-check-label" for="eventRoleBorrower">Borrowers</label>
+                                </div>
+                            </fieldset>
+                            <label for="eventBorrowerSearch" class="form-label mb-0">Find specific borrowers (optional)</label>
+                            <input id="eventBorrowerSearch" type="search" class="form-control"
+                                   placeholder="Search by name or membership code" autocomplete="off"
+                                   aria-controls="eventBorrowerPicker" aria-describedby="eventBorrowerHint" />
+                            <small class="text-muted" id="eventBorrowerSearchCount" role="status" aria-live="polite"></small>
+                            <div class="input-group">
+                                <select id="eventBorrowerPicker" class="form-select" aria-describedby="eventBorrowerHint">
+                                    <option value="">Select a borrower to add</option>
+                                    @foreach (var b in Model.Borrowers) { <option value="@b.Id">@b.Label</option> }
+                                </select>
+                                <button type="button" class="btn btn-outline-secondary" id="eventAddBorrower">Add</button>
+                            </div>
+                            <div class="border rounded p-2" id="eventBorrowerList" aria-live="polite" aria-label="Selected borrowers">
+                                <small class="text-muted" id="eventNoBorrowers">No specific borrowers selected.</small>
+                            </div>
+                            <small class="text-muted" id="eventBorrowerHint">Add as many borrowers as needed (up to 200). You can remove any name from the list. If the Borrowers role is checked and this list is empty, every borrower can see the event. Staff roles are independent.</small>
+                        }
+                        else { <small class="text-muted">Private to your account.</small> }
+                        <button type="submit" class="btn btn-outline-primary mt-1">Create event</button>
+                    </form>
+                </details>
+            </div>
+            <div class="col-lg-4">
+                <details class="border rounded p-3 h-100 calendar-editor">
+                    <summary class="fw-semibold mb-2">New reservation &amp; follow-up</summary>
+                    <form asp-action="CreateReservation" method="post" class="d-grid gap-2">
+                        <input type="hidden" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+                        <label for="reserveItem" class="form-label mb-0">Library item (physical copy)</label>
+                        <select name="itemId" id="reserveItem" class="form-select" required>
+                            <option value="">Select an item</option>
+                            @foreach (var i in Model.ReservableItems) { <option value="@i.Id">@i.Label</option> }
+                        </select>
+                        @if (Model.StaffView)
+                        {
+                            <label for="reserveBorrower" class="form-label mb-0">Borrower</label>
+                            <select name="borrowerId" id="reserveBorrower" class="form-select" required>
+                                <option value="">Select borrower</option>
+                                @foreach (var b in Model.Borrowers) { <option value="@b.Id">@b.Label</option> }
+                            </select>
+                        }
+                        <small class="text-muted">The reservation is placed today. The selected calendar date becomes a private reminder to check your queue position. Available items cannot be reserved without an existing hold.</small>
+                        <button type="submit" class="btn btn-outline-primary mt-1" disabled="@(Model.SelectedDate.Date < DateTime.Today)">Join reservation queue</button>
+                    </form>
+                </details>
+            </div>
+            <div class="col-lg-4">
+                <details class="border rounded p-3 h-100 calendar-editor">
+                    <summary class="fw-semibold mb-2">Schedule a notification</summary>
+                    <form asp-action="ScheduleNotification" method="post" class="d-grid gap-2">
+                        <input type="hidden" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+                        @if (Model.StaffView)
+                        {
+                            <label for="notifyBorrower" class="form-label mb-0">Notify borrower</label>
+                            <select name="borrowerId" id="notifyBorrower" class="form-select" required>
+                                <option value="">Select borrower</option>
+                                @foreach (var b in Model.Borrowers) { <option value="@b.Id">@b.Label</option> }
+                            </select>
+                        }
+                        else { <small class="text-muted">Scheduled to your account only.</small> }
+                        <label for="notifyTitle" class="form-label mb-0">Subject</label>
+                        <input id="notifyTitle" name="title" maxlength="120" class="form-control" required />
+                        <label for="notifyMessage" class="form-label mb-0">Message</label>
+                        <textarea id="notifyMessage" name="message" rows="2" maxlength="800" class="form-control" required></textarea>
+                        <label for="notifyChannel" class="form-label mb-0">Simulation channel</label>
+                        <select id="notifyChannel" name="delivery" class="form-select">
+                            <option value="Both">Email and SMS</option>
+                            <option value="Email">Email only</option>
+                            <option value="Sms">SMS only</option>
+                        </select>
+                        <button type="submit" class="btn btn-outline-primary mt-1" disabled="@(Model.SelectedDate.Date < DateTime.Today)">Schedule notification</button>
+                    </form>
+                </details>
+            </div>
+        </div>
+        <p class="small text-muted mt-3 mb-0">Scheduled messages are logged by the background notification check once their date arrives; no real email or SMS is sent.</p>
+    </div>
+</section>
+<section aria-labelledby="notificationHistoryTitle">
+    <h2 class="h4" id="notificationHistoryTitle">@(Model.StaffView ? "Recent notification simulator log" : "My recent notifications")</h2>
+    <p class="small text-muted">The last 100 simulated messages, including email and SMS entries.</p>
+    <div class="table-responsive"><table class="table table-striped align-middle">
+        <thead><tr><th>Time (server local)</th>@if(Model.StaffView) {<th>Borrower</th>}<th>Channel</th><th>Type</th>@if(Model.StaffView) {<th>Recipient</th>}<th>Message</th><th>Status</th></tr></thead>
+        <tbody>
+            @foreach (var item in Model.History)
+            {
+                <tr><td>@DateTime.SpecifyKind(item.CreatedAtUtc, DateTimeKind.Utc).ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                    @if (Model.StaffView) { <td>@item.Borrower.FirstName @item.Borrower.LastName</td> }
+                    <td>@item.Channel</td><td>@item.Type</td>@if(Model.StaffView) { <td>@item.Recipient</td> }<td><strong>@item.Subject</strong><div class="small">@item.Message</div></td><td>@item.DeliveryStatus</td></tr>
+            }
+            @if (!Model.History.Any()) { <tr><td colspan="@(Model.StaffView ? 7 : 5)" class="text-muted">No simulated notifications recorded yet.</td></tr> }
+        </tbody>
+    </table></div>
+</section>
+
+@section Scripts {
+<script>
+    (() => {
+        const picker = document.getElementById('eventBorrowerPicker');
+        const search = document.getElementById('eventBorrowerSearch');
+        const resultCount = document.getElementById('eventBorrowerSearchCount');
+        const addButton = document.getElementById('eventAddBorrower');
+        const list = document.getElementById('eventBorrowerList');
+        const emptyMessage = document.getElementById('eventNoBorrowers');
+        const borrowerRole = document.getElementById('eventRoleBorrower');
+        if (!picker || !search || !addButton || !list) return;
+
+        // Copy the server-provided options once, then rebuild only the filtered visible set.
+        // Labels include borrower name and membership code. We never send this list to public users.
+        const borrowers = Array.from(picker.options).filter(opt => opt.value).map(opt => ({
+            id: opt.value,
+            label: opt.textContent.trim(),
+            lookup: opt.textContent.trim().toLocaleLowerCase()
+        }));
+        const added = new Set();
+        let matches = [];
+        const renderOptions = () => {
+            const term = search.value.trim().toLocaleLowerCase();
+            matches = borrowers.filter(b => !added.has(b.id) && b.lookup.includes(term));
+            picker.replaceChildren(new Option(matches.length ? 'Select a borrower to add' : 'No matching borrowers', ''));
+            for (const entry of matches.slice(0, 60)) picker.add(new Option(entry.label, entry.id));
+            addButton.disabled = true;
+            if (resultCount) resultCount.textContent = matches.length > 60
+                ? `${matches.length} matches — displaying first 60. Type more of the name to narrow results.`
+                : `${matches.length} matching borrower${matches.length === 1 ? '' : 's'}.`;
+        };
+        const addBorrower = (id = picker.value) => {
+            const found = borrowers.find(b => b.id === id);
+            if (!id || !found || added.has(id) || added.size >= 200) return;
+            added.add(id);
+            if (borrowerRole) borrowerRole.checked = true;
+
+            const row = document.createElement('div');
+            row.className = 'd-flex justify-content-between align-items-center gap-2 py-1';
+            row.dataset.borrowerId = id;
+            const name = document.createElement('span');
+            name.textContent = found.label;
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'borrowerIds';
+            hidden.value = id;
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'btn btn-sm btn-outline-danger';
+            remove.textContent = 'Remove';
+            remove.setAttribute('aria-label', 'Remove ' + found.label);
+            remove.addEventListener('click', () => {
+                added.delete(id);
+                row.remove();
+                emptyMessage.hidden = added.size !== 0;
+                // Do not accidentally switch a restricted event to “all borrowers”
+                // if its final explicitly selected recipient gets removed.
+                if (added.size === 0 && borrowerRole) borrowerRole.checked = false;
+                renderOptions();
+                search.focus();
+            });
+            row.append(name, hidden, remove);
+            list.append(row);
+            emptyMessage.hidden = true;
+            search.value = '';
+            renderOptions();
+            search.focus();
+        };
+        search.addEventListener('input', renderOptions);
+        search.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (matches.length === 1) addBorrower(matches[0].id);
+                else picker.focus();
+            }
+        });
+        picker.addEventListener('change', () => { addButton.disabled = !picker.value; });
+        addButton.addEventListener('click', () => addBorrower());
+        picker.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); addBorrower(); }
+        });
+        renderOptions();
+    })();
+</script>
+}

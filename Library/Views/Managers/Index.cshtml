@@ -1,0 +1,106 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.ManagerDashboardViewModel
+
+@{
+    ViewData["Title"] = "Manager Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>Manager Dashboard</h1>
+        <p class="text-muted mb-0">Library borrowing, item status and fine statistics.</p>
+    </div>
+    <small class="text-muted">Generated @Model.GeneratedOn.ToString("dd/MM/yyyy HH:mm")</small>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="h4">Borrowing Statistics</h2>
+                <dl class="row mb-3">
+                    <dt class="col-8">Total borrowings</dt>
+                    <dd class="col-4 text-end">@Model.Borrowing.TotalBorrowings</dd>
+                    <dt class="col-8">Currently borrowed</dt>
+                    <dd class="col-4 text-end">@Model.Borrowing.ActiveBorrowings</dd>
+                    <dt class="col-8">Currently overdue</dt>
+                    <dd class="col-4 text-end">@Model.Borrowing.OverdueBorrowings</dd>
+                    <dt class="col-8">Returned</dt>
+                    <dd class="col-4 text-end">@Model.Borrowing.ReturnedBorrowings</dd>
+                </dl>
+                <a asp-action="BorrowingStatistics" class="btn btn-primary">View borrowing statistics</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="h4">Item Status Statistics</h2>
+                <dl class="row mb-3">
+                    <dt class="col-8">Total items</dt>
+                    <dd class="col-4 text-end">@Model.Items.TotalItems</dd>
+                    <dt class="col-8">Available</dt>
+                    <dd class="col-4 text-end">@Model.Items.AvailableItems</dd>
+                    <dt class="col-8">Borrowed</dt>
+                    <dd class="col-4 text-end">@Model.Items.BorrowedItems</dd>
+                    <dt class="col-8">Damaged / destroyed</dt>
+                    <dd class="col-4 text-end">@(Model.Items.DamagedItems + Model.Items.DestroyedItems)</dd>
+                </dl>
+                <a asp-action="ItemStatistics" class="btn btn-primary">View item statistics</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="h4">Fine Statistics</h2>
+                <dl class="row mb-3">
+                    <dt class="col-8">Total fines charged</dt>
+                    <dd class="col-4 text-end">@Model.Fines.TotalFinesCharged.ToString("C")</dd>
+                    <dt class="col-8">Borrowings with fines</dt>
+                    <dd class="col-4 text-end">@Model.Fines.BorrowingsWithFines</dd>
+                    <dt class="col-8">Average fine</dt>
+                    <dd class="col-4 text-end">@Model.Fines.AverageFine.ToString("C")</dd>
+                    <dt class="col-8">Current estimated overdue fines</dt>
+                    <dd class="col-4 text-end">@Model.Fines.EstimatedCurrentOverdueFines.ToString("C")</dd>
+                </dl>
+                <a asp-action="FineStatistics" class="btn btn-primary">View fine statistics</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    var extended = ViewBag.Extended as S379658_HIT339_Assignment2_Library.ViewModels.ExtendedManagerDashboard;
+}
+@if (extended != null)
+{
+    <section class="mt-5">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <h2 class="h3">Branches, reservations and transfers</h2>
+                <a asp-controller="Branches" asp-action="Create" class="btn btn-outline-primary">Create branch</a>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-controller="Reports" asp-action="Index" class="btn btn-primary">Reports and CSV/PDF export</a>
+                <a asp-controller="Payments" asp-action="Index" class="btn btn-outline-secondary">Record fine payments</a>
+            </div>
+        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-4"><div class="card card-body"><small>Total fines charged</small><strong class="fs-4">@extended.TotalFinesCharged.ToString("C")</strong></div></div>
+            <div class="col-md-4"><div class="card card-body"><small>Payments received</small><strong class="fs-4">@extended.TotalPaymentsReceived.ToString("C")</strong></div></div>
+            <div class="col-md-4"><div class="card card-body"><small>Outstanding fine balance</small><strong class="fs-4">@extended.OutstandingBalance.ToString("C")</strong></div></div>
+        </div>
+        <p>Queued reservations: <strong>@extended.TotalPendingReservations</strong> · Ready for pickup: <strong>@extended.TotalReadyReservations</strong> · Pending transfers: <strong>@extended.TotalPendingTransfers</strong></p>
+        <div class="table-responsive"><table class="table table-striped table-bordered">
+            <thead><tr><th>Branch</th><th>Copies</th><th>Available</th><th>Damaged / destroyed</th><th>Active loans</th><th>Queued holds</th><th>Ready holds</th><th>Pending transfers</th></tr></thead>
+            <tbody>
+            @foreach (var branch in extended.Branches)
+            {
+                <tr><td>@branch.BranchName</td><td>@branch.Copies</td><td>@branch.Available</td><td>@branch.DamagedOrDestroyed</td><td>@branch.ActiveLoans</td><td>@branch.PendingReservations</td><td>@branch.ReadyReservations</td><td>@branch.PendingTransfers</td></tr>
+            }
+            </tbody>
+        </table></div>
+    </section>
+}

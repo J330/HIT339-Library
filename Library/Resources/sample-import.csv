@@ -1,0 +1,4 @@
+Type,LibraryCode,Name,Description,BranchCode,Author,Genre,Artist,Year,ToyType,MinimumAge
+Book,SAMPLE-101,Example History Book,Introduction to history,MAIN,A. Example,History,,,,
+Music,SAMPLE-102,Example Soundtrack,Instrumental music,MAIN,,Instrumental,Example Orchestra,2023,,
+Toy,SAMPLE-103,Example Building Blocks,Wooden blocks,MAIN,,,,,Construction,4

@@ -1,0 +1,17 @@
+<Window x:Class="LibraryDesktopClient.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="Library Management" Width="1150" Height="780" MinWidth="750" MinHeight="540">
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Background="#F4F6FA" Padding="10">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Home" Padding="16,7" Margin="0,0,8,0" Click="Home_Click" />
+                <Button Content="Back" Padding="16,7" Margin="0,0,8,0" Click="Back_Click" />
+                <Button Content="Refresh" Padding="16,7" Margin="0,0,8,0" Click="Refresh_Click" />
+                <TextBlock VerticalAlignment="Center" Text="Connected to the library website" Foreground="#475569" />
+            </StackPanel>
+        </Border>
+        <wv2:WebView2 x:Name="Browser" />
+    </DockPanel>
+</Window>

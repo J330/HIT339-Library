@@ -1,0 +1,133 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.AdminItemViewModel
+
+@{
+    ViewData["Title"] = "Edit Item";
+}
+
+<h1>Edit Item</h1>
+<p class="text-muted">Update the selected library item's details.</p>
+
+<div class="row">
+    <div class="col-md-8 col-lg-6">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ItemType" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label class="form-label">Item Type</label>
+                <input class="form-control" value="@Model.ItemType" disabled />
+                <div class="form-text">The item type cannot be changed after creation.</div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="LibraryCode" class="form-label"></label>
+                <input asp-for="LibraryCode" class="form-control" />
+                <span asp-validation-for="LibraryCode" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="BranchId" class="form-label"></label>
+                <input type="hidden" asp-for="BranchId" />
+                <select asp-for="BranchId" asp-items="ViewBag.BranchId" class="form-select" disabled></select>
+                <div class="form-text">Holding branch changes are made through the Transfers page.</div>
+                <span asp-validation-for="BranchId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Status" class="form-label"></label>
+                @if (ViewBag.HasActiveBorrowing == true)
+                {
+                    <input type="hidden" asp-for="Status" />
+                    <input class="form-control" value="Borrowed" disabled />
+                    <div class="form-text">This status is locked until the item is returned at reception.</div>
+                }
+                else
+                {
+                    <select asp-for="Status" class="form-select">
+                        <option value="Available">Available</option>
+                        <option value="Damaged">Damaged</option>
+                        <option value="Destroyed">Destroyed</option>
+                    </select>
+                    <div class="form-text">Borrowed status is set automatically by the reception borrowing process.</div>
+                }
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+
+            @if (Model.ItemType == LibraryItemType.Book)
+            {
+                <div class="border rounded p-3 mb-3">
+                    <h5>Book Details</h5>
+                    <div class="mb-3">
+                        <label asp-for="Author" class="form-label"></label>
+                        <input asp-for="Author" class="form-control" />
+                        <span asp-validation-for="Author" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Genre" class="form-label"></label>
+                        <input asp-for="Genre" class="form-control" />
+                        <span asp-validation-for="Genre" class="text-danger"></span>
+                    </div>
+                </div>
+            }
+            else if (Model.ItemType == LibraryItemType.Music)
+            {
+                <div class="border rounded p-3 mb-3">
+                    <h5>Music Details</h5>
+                    <div class="mb-3">
+                        <label asp-for="Artist" class="form-label"></label>
+                        <input asp-for="Artist" class="form-control" />
+                        <span asp-validation-for="Artist" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Year" class="form-label"></label>
+                        <input asp-for="Year" class="form-control" />
+                        <span asp-validation-for="Year" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Genre" class="form-label"></label>
+                        <input asp-for="Genre" class="form-control" />
+                        <span asp-validation-for="Genre" class="text-danger"></span>
+                    </div>
+                </div>
+            }
+            else if (Model.ItemType == LibraryItemType.Toy)
+            {
+                <div class="border rounded p-3 mb-3">
+                    <h5>Toy Details</h5>
+                    <div class="mb-3">
+                        <label asp-for="ToyType" class="form-label"></label>
+                        <input asp-for="ToyType" class="form-control" />
+                        <span asp-validation-for="ToyType" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label asp-for="MinimumAge" class="form-label"></label>
+                        <input asp-for="MinimumAge" class="form-control" />
+                        <span asp-validation-for="MinimumAge" class="text-danger"></span>
+                    </div>
+                </div>
+            }
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

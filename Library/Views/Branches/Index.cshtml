@@ -1,0 +1,18 @@
+@model IEnumerable<LibraryBranch>
+@{ ViewData["Title"] = "Branch Management"; }
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3"><h1>Branch Management</h1><a asp-action="Create" class="btn btn-primary">Create new branch</a></div>
+@if (TempData["ErrorMessage"] is string error) { <div class="alert alert-danger">@error</div> }
+<div class="row g-3">
+@foreach (var branch in Model) {
+ <div class="col-lg-6"><div class="card h-100"><div class="card-body">
+   <div class="d-flex justify-content-between"><h2 class="h4">@branch.Name <small class="text-muted">(@branch.Code)</small></h2><a asp-action="Edit" asp-route-id="@branch.Id" class="btn btn-sm btn-outline-primary">Edit</a></div>
+   <p>@branch.Address<br />@branch.Phone<br />@branch.OpeningHours</p>
+   <p><strong>Active:</strong> @(branch.IsActive ? "Yes" : "No") · <strong>Physical copies:</strong> @branch.Items.Count</p>
+   <h3 class="h6">Reception desks</h3>
+   @foreach(var desk in branch.ReceptionDesks) { <span class="badge bg-secondary me-1">@desk.Name</span> }
+   <form asp-action="AddDesk" method="post" class="row g-2 mt-2"><input type="hidden" name="branchId" value="@branch.Id" />
+      <div class="col"><input name="name" required maxlength="80" class="form-control" placeholder="New desk name" /></div>
+      <div class="col-auto"><button class="btn btn-outline-primary">Add desk</button></div></form>
+ </div></div></div>
+}
+</div>

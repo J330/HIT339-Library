@@ -1,0 +1,63 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.BorrowItemViewModel
+
+@{
+    ViewData["Title"] = "Borrow Item";
+}
+
+<h1>Borrow Item</h1>
+<h4>New Borrowing</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Borrow">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="LibraryCode" class="control-label"></label>
+                <input asp-for="LibraryCode" class="form-control" placeholder="e.g. BK001" />
+                <span asp-validation-for="LibraryCode" class="text-danger"></span>
+                <small class="form-text text-muted">Enter the unique library code printed on the item.</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="BorrowerId" class="control-label"></label>
+                <select asp-for="BorrowerId" class="form-select" asp-items="ViewBag.BorrowerId">
+                    <option value="0">-- Select Borrower --</option>
+                </select>
+                <span asp-validation-for="BorrowerId" class="text-danger"></span>
+                <small class="form-text text-muted">
+                    Borrower not listed? <a asp-controller="Borrowers" asp-action="Create">Create their details first</a>.
+                </small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="BranchId" class="control-label"></label>
+                <select asp-for="BranchId" asp-items="ViewBag.BranchId" class="form-select"><option value="0">-- Select reception branch --</option></select>
+                <span asp-validation-for="BranchId" class="text-danger"></span>
+                <small class="text-muted">The copy must physically belong to this branch.</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="BorrowDate" class="control-label"></label>
+                <input asp-for="BorrowDate" class="form-control" />
+                <span asp-validation-for="BorrowDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="DueDate" class="control-label"></label>
+                <input asp-for="DueDate" class="form-control" />
+                <span asp-validation-for="DueDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Borrow Item" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

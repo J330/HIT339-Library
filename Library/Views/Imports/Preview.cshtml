@@ -1,0 +1,83 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.ExternalImportForm
+@using S379658_HIT339_Assignment2_Library.Services
+@{
+    ViewData["Title"] = "Review External Import";
+    var record = (ExternalMediaRecord)ViewBag.ExternalRecord;
+    var existing = (int)ViewBag.ExistingCopies;
+}
+<div class="mb-3"><a asp-action="Search" class="btn btn-outline-secondary">&larr; Back to external search</a></div>
+<h1 class="h3">Review and import a library copy</h1>
+<p class="text-muted">This is an external metadata record. Nothing is added to your inventory until you confirm the details below.</p>
+<div class="card shadow-sm mb-4"><div class="card-body">
+    <span class="badge text-bg-secondary mb-2">@record.Provider · @record.Type</span>
+    <h2 class="h4">@record.Title</h2>
+    <dl class="row mb-0">
+        <dt class="col-sm-3">Author / artist</dt><dd class="col-sm-9">@record.Creator</dd>
+        <dt class="col-sm-3">Suggested genre</dt><dd class="col-sm-9">@record.Genre</dd>
+        @if (record.Year.HasValue) { <dt class="col-sm-3">Year</dt><dd class="col-sm-9">@record.Year</dd> }
+        @if (!string.IsNullOrWhiteSpace(record.SourceUrl)) {
+            <dt class="col-sm-3">External source</dt>
+            <dd class="col-sm-9"><a href="@record.SourceUrl" target="_blank" rel="noopener noreferrer">View source metadata</a></dd>
+        }
+    </dl>
+    @if (existing > 0)
+    { <div class="alert alert-info mt-3 mb-0">The library already has @existing copy/copies with this title. You can add another physical copy if it has a different library code.</div> }
+</div></div>
+<form asp-action="Confirm" method="post" class="card shadow-sm">
+    @Html.AntiForgeryToken()
+    <input asp-for="Provider" type="hidden" />
+    <input asp-for="ExternalId" type="hidden" />
+    <div class="card-body">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="LibraryCode" class="form-label"></label>
+                <input asp-for="LibraryCode" class="form-control" placeholder="e.g. MAIN-B-0104" required />
+                <span asp-validation-for="LibraryCode" class="text-danger"></span>
+                <div class="form-text">Every physical copy needs its own unique library code.</div>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="BranchId" class="form-label"></label>
+                <select asp-for="BranchId" asp-items="ViewBag.Branches" class="form-select" required>
+                    <option value="">Choose a branch</option>
+                </select>
+                <span asp-validation-for="BranchId" class="text-danger"></span>
+            </div>
+            @if (record.Type != "Toy") {
+                <div class="col-md-6">
+                    <label asp-for="Creator" class="form-label"></label>
+                    <input asp-for="Creator" class="form-control" required />
+                    <span asp-validation-for="Creator" class="text-danger"></span>
+                </div>
+            }
+            <div class="col-md-6">
+                <label asp-for="Genre" class="form-label"></label>
+                <input asp-for="Genre" class="form-control" required />
+                <span asp-validation-for="Genre" class="text-danger"></span>
+            </div>
+            @if (record.Type == "Music") {
+                <div class="col-md-6">
+                    <label asp-for="Year" class="form-label"></label>
+                    <input asp-for="Year" type="number" min="1000" max="3000" class="form-control" required />
+                    <span asp-validation-for="Year" class="text-danger"></span>
+                </div>
+            }
+            @if (record.Type == "Toy") {
+                <div class="col-md-6">
+                    <label asp-for="MinimumAge" class="form-label"></label>
+                    <input asp-for="MinimumAge" type="number" min="0" max="18" class="form-control" required />
+                    <span asp-validation-for="MinimumAge" class="text-danger"></span>
+                </div>
+            }
+            <div class="col-12">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" rows="3" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">Confirm import</button>
+            <a asp-action="Search" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </div>
+</form>

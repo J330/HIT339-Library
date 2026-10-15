@@ -1,0 +1,52 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.BorrowerRegistrationViewModel
+@{ ViewData["Title"] = "Create a library account"; }
+<div class="row justify-content-center py-3">
+    <div class="col-lg-8 col-xl-7">
+        <h1>Create a borrower account</h1>
+        <p class="lead text-muted">Register for a membership code, then sign in to borrow items, reserve books and view your account.</p>
+        <div class="alert alert-info" role="note">Already have a membership created at reception? Ask reception to activate it rather than registering a second account.</div>
+        <form asp-controller="MemberAccount" asp-action="Register" method="post" class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                <h2 class="h5 mb-3">Your details</h2>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label asp-for="FirstName" class="form-label"></label><input asp-for="FirstName" class="form-control" autocomplete="given-name" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="LastName" class="form-label"></label><input asp-for="LastName" class="form-control" autocomplete="family-name" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Email" class="form-label"></label><input asp-for="Email" class="form-control" autocomplete="email" inputmode="email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="Phone" class="form-label"></label><input asp-for="Phone" class="form-control" autocomplete="tel" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Address" class="form-label"></label><input asp-for="Address" class="form-control" autocomplete="street-address" />
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+                </div>
+                <h2 class="h5 mt-4 mb-3">Secure your account</h2>
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label"></label>
+                    <input asp-for="Username" class="form-control" autocomplete="username" placeholder="e.g. alex.reader" />
+                    <div class="form-text">Choose a unique sign-in name (3–32 letters, numbers, dots, underscores or hyphens). Your membership barcode will also work.</div>
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
+                <p class="small text-muted">Use at least 8 characters, including uppercase and lowercase letters, a number and a symbol.</p>
+                <div class="row g-3">
+                    <div class="col-sm-6"><label asp-for="Password" class="form-label"></label><input asp-for="Password" class="form-control" autocomplete="new-password" /><span asp-validation-for="Password" class="text-danger"></span></div>
+                    <div class="col-sm-6"><label asp-for="ConfirmPassword" class="form-label"></label><input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" /><span asp-validation-for="ConfirmPassword" class="text-danger"></span></div>
+                </div>
+                <button class="btn btn-primary btn-lg mt-4" type="submit">Create my account</button>
+                <a class="btn btn-link mt-4" asp-controller="Kiosk" asp-action="Login">Already a member? Sign in</a>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

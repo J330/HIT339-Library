@@ -1,0 +1,15 @@
+@model IEnumerable<ItemTransfer>
+@{ ViewData["Title"] = "Inter-branch transfers"; }
+<div class="d-flex justify-content-between mb-3"><h1>Inter-branch transfers</h1><a asp-action="Create" class="btn btn-primary">Request transfer</a></div>
+@if (TempData["SuccessMessage"] is string success) { <div class="alert alert-success">@success</div> }
+@if (TempData["ErrorMessage"] is string error) { <div class="alert alert-danger">@error</div> }
+<div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>Item</th><th>From → To</th><th>Requested (UTC)</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead><tbody>
+@foreach(var t in Model) { <tr>
+<td>@t.Item.Name <small class="text-muted">(@t.Item.LibraryCode)</small></td><td>@t.SourceBranch.Name → @t.DestinationBranch.Name</td>
+<td>@t.RequestedAtUtc.ToString("dd MMM yyyy HH:mm")</td><td>@t.Status</td><td>@t.Notes</td><td>
+@if(t.Status == TransferStatus.Pending) {
+  <form asp-action="Complete" asp-route-id="@t.Id" method="post" class="d-inline"><button class="btn btn-sm btn-success">Mark received</button></form>
+  <form asp-action="Cancel" asp-route-id="@t.Id" method="post" class="d-inline"><button class="btn btn-sm btn-outline-danger">Cancel</button></form>
+} else { <span>—</span> }
+</td></tr> }
+</tbody></table></div>

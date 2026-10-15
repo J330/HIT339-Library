@@ -1,0 +1,48 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.ItemStatisticsViewModel
+
+@{
+    ViewData["Title"] = "Item Status Statistics";
+}
+
+<h1>Item Status Statistics</h1>
+<p class="text-muted">Current item availability and catalogue type totals.</p>
+
+<div class="row g-4 mt-1">
+    <div class="col-lg-7">
+        <h2 class="h4">Status</h2>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Item status</th>
+                    <th class="text-end">Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Total items</td><td class="text-end">@Model.TotalItems</td></tr>
+                <tr><td>Available</td><td class="text-end">@Model.AvailableItems</td></tr>
+                <tr><td>Borrowed</td><td class="text-end">@Model.BorrowedItems</td></tr>
+                <tr><td>Damaged</td><td class="text-end">@Model.DamagedItems</td></tr>
+                <tr><td>Destroyed</td><td class="text-end">@Model.DestroyedItems</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-lg-5">
+        <h2 class="h4">Catalogue Types</h2>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Item type</th>
+                    <th class="text-end">Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Books</td><td class="text-end">@Model.Books</td></tr>
+                <tr><td>Music</td><td class="text-end">@Model.Music</td></tr>
+                <tr><td>Toys</td><td class="text-end">@Model.Toys</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary">Back to Manager Dashboard</a>

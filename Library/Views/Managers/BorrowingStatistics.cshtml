@@ -1,0 +1,27 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.BorrowingStatisticsViewModel
+
+@{
+    ViewData["Title"] = "Borrowing Statistics";
+}
+
+<h1>Borrowing Statistics</h1>
+<p class="text-muted">Statistics are calculated from the borrowing records stored in the database.</p>
+
+<table class="table table-striped table-bordered mt-4">
+    <thead>
+        <tr>
+            <th>Statistic</th>
+            <th class="text-end">Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>Total borrowings</td><td class="text-end">@Model.TotalBorrowings</td></tr>
+        <tr><td>Currently borrowed</td><td class="text-end">@Model.ActiveBorrowings</td></tr>
+        <tr><td>Currently overdue</td><td class="text-end">@Model.OverdueBorrowings</td></tr>
+        <tr><td>Returned</td><td class="text-end">@Model.ReturnedBorrowings</td></tr>
+        <tr><td>Returned on time / no fine</td><td class="text-end">@Model.OnTimeReturns</td></tr>
+        <tr><td>Late returns with a fine</td><td class="text-end">@Model.LateReturns</td></tr>
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">Back to Manager Dashboard</a>

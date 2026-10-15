@@ -1,0 +1,54 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.MediaImportForm
+@using S379658_HIT339_Assignment2_Library.ViewModels
+@{
+    ViewData["Title"] = "Import Library Items";
+    var outcome = ViewBag.ImportResult as MediaImportResult;
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="mb-0">Import library items</h1>
+    <a asp-action="Search" class="btn btn-primary">Search Open Library / MusicBrainz</a>
+</div>
+<p class="text-muted">Staff-only bulk catalogue importer. One row creates one physical copy, located at the branch in its BranchCode column. Only Book, Music and Toy are supported.</p>
+@if (outcome != null)
+{
+    <div class="alert @(outcome.Success ? "alert-success" : "alert-warning")" role="status">
+        <strong>@(outcome.Success ? "Import completed" : "Import rejected")</strong>
+        — @outcome.Imported of @outcome.RowsRead rows imported.
+        @if (outcome.Errors.Count > 0)
+        {
+            <ul class="mb-0 mt-2">@foreach (var message in outcome.Errors) { <li>@message</li> }</ul>
+            <p class="mb-0 mt-2">No rows are imported when validation fails.</p>
+        }
+    </div>
+}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm"><div class="card-body">
+            <h2 class="h5">Upload CSV file</h2>
+            <p><a asp-action="SampleCsv">Download example CSV template</a></p>
+            <form asp-action="Csv" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <label class="form-label" asp-for="File"></label>
+                <input asp-for="File" type="file" accept=".csv,text/csv" class="form-control mb-3" required />
+                <button class="btn btn-primary" type="submit">Validate and import CSV</button>
+            </form>
+        </div></div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card shadow-sm"><div class="card-body">
+            <h2 class="h5">Mock external metadata provider</h2>
+            <p>Import four predefined sample records from <code>Resources/mock-media.json</code>.</p>
+            <form asp-action="Mock" method="post">
+                @Html.AntiForgeryToken()
+                <label asp-for="BranchId" class="form-label"></label>
+                <select asp-for="BranchId" asp-items="ViewBag.Branches" class="form-select mb-3" required>
+                    <option value="">Select branch</option>
+                </select>
+                <button class="btn btn-outline-primary" type="submit">Import mock records</button>
+            </form>
+            <small class="text-muted">Running this more than once rejects duplicate library codes.</small>
+        </div></div>
+    </div>
+</div>
+<p class="mt-4">CSV columns: <code>Type,LibraryCode,Name,Description,BranchCode,Author,Genre,Artist,Year,ToyType,MinimumAge</code>.</p>
+<p class="text-muted">Required fields: Book — Author and Genre; Music — Artist, Genre and Year; Toy — ToyType and MinimumAge. Imported copies begin as Available. Maximum: 500 records / 2 MB. Files are read in memory and not stored.</p>

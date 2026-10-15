@@ -1,0 +1,16 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.EditLoanDueDateViewModel
+@{ ViewData["Title"] = "Change loan due date"; }
+<h1>Change loan due date</h1>
+<p><strong>@Model.ItemName</strong> borrowed by <strong>@Model.BorrowerName</strong> on @Model.BorrowDate.ToString("dd MMM yyyy").</p>
+<form asp-action="EditDueDate" method="post" class="card card-body" style="max-width: 38rem;">
+    <input asp-for="Id" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="DueDate" class="form-label"></label>
+        <input asp-for="DueDate" type="date" class="form-control" />
+        <span asp-validation-for="DueDate" class="text-danger"></span>
+    </div>
+    <div><button class="btn btn-primary" type="submit">Save due date</button>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancel</a></div>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

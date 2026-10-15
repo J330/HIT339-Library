@@ -1,0 +1,100 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.ExternalSearchViewModel
+@{
+    ViewData["Title"] = "Search External Media";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Search external book &amp; music metadata</h1>
+        <p class="text-muted mb-0">Find books or albums from public providers, review details, then import physical copies into your library.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">CSV / batch imports</a>
+</div>
+@if (TempData["ImportSuccess"] is string success) { <div class="alert alert-success" role="status">@success</div> }
+@if (TempData["ImportError"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
+<div class="card shadow-sm mb-4"><div class="card-body">
+    <form asp-action="Search" method="get">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-3 col-md-6">
+                <label for="provider" class="form-label">Data provider</label>
+                <select id="provider" name="provider" class="form-select">
+                    <option value="OpenLibrary" selected="@(Model.Provider == "OpenLibrary")">Open Library (books)</option>
+                    <option value="MusicBrainz" selected="@(Model.Provider == "MusicBrainz")">MusicBrainz (music)</option>
+                    <option value="Mock" selected="@(Model.Provider == "Mock")">Offline mock data</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <label for="searchType" class="form-label">Search by</label>
+                <select id="searchType" name="searchType" class="form-select">
+                    <option value="keyword" selected="@(Model.SearchType == "keyword")">Keywords</option>
+                    <option value="title" selected="@(Model.SearchType == "title")">Book title</option>
+                    <option value="author" selected="@(Model.SearchType == "author")">Book author</option>
+                    <option value="isbn" selected="@(Model.SearchType == "isbn")">ISBN</option>
+                    <option value="album" selected="@(Model.SearchType == "album")">Album name</option>
+                    <option value="artist" selected="@(Model.SearchType == "artist")">Music artist</option>
+                </select>
+            </div>
+            <div class="col-lg-5 col-md-8">
+                <label for="query" class="form-label">Title, author, ISBN, album or artist</label>
+                <input id="query" name="query" class="form-control" minlength="2" maxlength="100" required
+                       value="@Model.Query" placeholder="e.g. The Hobbit or Abbey Road" />
+            </div>
+            <div class="col-lg-2 col-md-4 d-grid"><button type="submit" class="btn btn-primary">Search provider</button></div>
+        </div>
+    </form>
+</div></div>
+@if (!string.IsNullOrEmpty(Model.Error)) { <div class="alert alert-warning" role="alert">@Model.Error</div> }
+@if (Model.Searched && Model.Error == null)
+{
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h5 mb-0">Search results (@Model.Results.Count)</h2>
+        <span class="text-muted small">Metadata results are not necessarily held by this library.</span>
+    </div>
+    @if (Model.Results.Count == 0)
+    { <div class="alert alert-info">No results found. Try another term, search type or provider.</div> }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead><tr><th>Title</th><th>Author / artist</th><th>Type / year</th><th>Source</th><th>Action</th></tr></thead>
+                <tbody>
+                @foreach (var item in Model.Results)
+                {
+                    <tr>
+                        <td class="fw-semibold">@item.Title</td>
+                        <td>@(string.IsNullOrEmpty(item.Creator) ? "—" : item.Creator)</td>
+                        <td>@item.Type @item.Year</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.SourceUrl))
+                            { <a href="@item.SourceUrl" target="_blank" rel="noopener noreferrer">Source record</a> }
+                            else { <span>Local sample</span> }
+                        </td>
+                        <td><a class="btn btn-sm btn-outline-primary" asp-action="Preview"
+                               asp-route-provider="@item.Provider" asp-route-externalId="@item.ExternalId">Review &amp; import</a></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+<div class="small text-muted mt-3">Open Library and MusicBrainz require an internet connection. The mock catalogue works offline. Search results are limited to 12 records per request.</div>
+@section Scripts {
+<script>
+(function () {
+  const provider = document.getElementById('provider');
+  const mode = document.getElementById('searchType');
+  const available = {
+    OpenLibrary: ['keyword', 'title', 'author', 'isbn'],
+    MusicBrainz: ['keyword', 'album', 'artist'],
+    Mock: ['keyword']
+  };
+  function updateModes() {
+    const allowed = available[provider.value] || ['keyword'];
+    [...mode.options].forEach(o => o.hidden = !allowed.includes(o.value));
+    if (!allowed.includes(mode.value)) mode.value = 'keyword';
+  }
+  provider.addEventListener('change', updateModes);
+  updateModes();
+})();
+</script>
+}

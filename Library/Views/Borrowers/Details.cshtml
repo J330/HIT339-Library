@@ -1,0 +1,114 @@
+@model S379658_HIT339_Assignment2_Library.Models.Borrower
+
+@{
+    ViewData["Title"] = "Borrower Details";
+}
+
+<h1>Borrower details</h1>
+<div class="card border-primary mb-3">
+    <div class="card-body">
+        <h2 class="h5">Kiosk membership</h2>
+        <p class="mb-2"><strong>Member code:</strong> <code class="fs-5">@Model.MembershipCode</code></p>
+        @if (TempData["NewKioskPassword"] is string initialPassword)
+        {
+            <div class="alert alert-warning" role="alert">
+                <strong>One-time temporary password:</strong> <code>@initialPassword</code><br />
+                Give this privately to the member. It is not stored or shown on this page again.
+            </div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+        }
+        @if (Model.IdentityUserId.HasValue)
+        {
+            <p class="text-success">Kiosk access is active.</p>
+            @if (User.IsInRole("Reception"))
+            {
+                <form asp-action="ResetKioskPassword" asp-route-id="@Model.Id" method="post">
+                    <button type="submit" class="btn btn-outline-primary">Issue new temporary password</button>
+                </form>
+            }
+        }
+        else
+        {
+            <p class="text-muted">This existing member has not yet received a kiosk login.</p>
+            @if (User.IsInRole("Reception"))
+            {
+                <form asp-action="ActivateKiosk" asp-route-id="@Model.Id" method="post">
+                    <button type="submit" class="btn btn-primary">Activate kiosk access</button>
+                </form>
+            }
+        }
+    </div>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div>
+    <h4>Borrower</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.FirstName)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.FirstName)</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.LastName)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.LastName)</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Email)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Email)</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Phone)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Phone)</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Address)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Address)</dd>
+    </dl>
+</div>
+
+<h4 class="mt-4">Borrowing History</h4>
+@if (Model.Borrowings.Any())
+{
+    <table class="table table-sm table-striped">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Library Code</th>
+                <th>Checkout method</th>
+                <th>Borrow Date</th>
+                <th>Due Date</th>
+                <th>Return Date</th>
+                <th>Fine</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var borrowing in Model.Borrowings.OrderByDescending(b => b.BorrowDate))
+        {
+            <tr>
+                <td>@borrowing.Item.Name</td>
+                <td>@borrowing.Item.LibraryCode</td>
+                <td>@borrowing.Channel</td>
+                <td>@borrowing.BorrowDate.ToShortDateString()</td>
+                <td>@borrowing.DueDate.ToShortDateString()</td>
+                <td>@(borrowing.ReturnDate?.ToShortDateString() ?? "Not returned")</td>
+                <td>@borrowing.FineAmount.ToString("C")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No borrowing history.</p>
+}
+
+<div>
+    @if (User.IsInRole("Reception"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+    }
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>
