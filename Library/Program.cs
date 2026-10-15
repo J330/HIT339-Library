@@ -175,6 +175,11 @@ using (var scope = app.Services.CreateScope())
             app.Configuration["LibraryBootstrap:AdminUsername"],
             app.Configuration["LibraryBootstrap:AdminPassword"],
             app.Configuration["LibraryBootstrap:AdminEmail"]);
+        // Optional one-time demonstration data for an explicitly configured Azure deployment.
+        // This never uses the known local Development passwords.
+        await DatabaseSeeder.SeedConfiguredProductionDemoAsync(
+            context, userManager, app.Configuration,
+            services.GetRequiredService<ILoggerFactory>().CreateLogger("LibraryDemoSeed"));
     }
 }
 

@@ -90,6 +90,168 @@ public static class DatabaseSeeder
         ThrowIfFailed(await userManager.AddToRoleAsync(account, AppRoles.Admin), "assign production admin role");
     }
 
+    /// <summary>
+    /// Explicit one-time demo data seeding for a publicly reachable Production deployment.
+    /// Set LibraryDemoSeed__Enabled=true and five DIFFERENT strong passwords in the
+    /// App Service configuration. Never embed demonstration credentials in source control.
+    /// This method never resets existing accounts or grants staff roles to a conflicting account.
+    /// Disable the switch and remove secrets once the accounts have been created.
+    /// </summary>
+    public static async Task SeedConfiguredProductionDemoAsync(
+        AppDbContext context,
+        UserManager<ApplicationUser> userManager,
+        IConfiguration configuration,
+        ILogger logger)
+    {
+        if (!configuration.GetValue<bool>("LibraryDemoSeed:Enabled"))
+            return;
+
+        var credentials = new (string Username, string ConfigurationKey, string Role, string FullName)[]
+        {
+            ("admin", "AdminPassword", AppRoles.Admin, "Library Administrator"),
+            ("manager", "ManagerPassword", AppRoles.Manager, "Library Manager"),
+            ("reception", "ReceptionPassword", AppRoles.Reception, "Reception Staff"),
+            ("borrower1", "Borrower1Password", AppRoles.Borrower, "Demo Borrower One"),
+            ("borrower2", "Borrower2Password", AppRoles.Borrower, "Demo Borrower Two")
+        };
+
+        // Validate every secret before writing anything: no partly seeded libraries.
+        var passwords = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var account in credentials)
+        {
+            var password = configuration[$"LibraryDemoSeed:{account.ConfigurationKey}"];
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 12 ||
+                !password.Any(char.IsUpper) || !password.Any(char.IsLower) ||
+                !password.Any(char.IsDigit) || !password.Any(ch => !char.IsLetterOrDigit(ch)))
+            {
+                throw new InvalidOperationException(
+                    $"LibraryDemoSeed:{account.ConfigurationKey} must be set to a strong password " +
+                    "(12+ characters, upper/lowercase, digit and symbol). " +
+                    "Do not use passwords included in the local development seeder.");
+            }
+
+            passwords.Add(account.Username, password);
+        }
+
+        // The well-known local demo passwords must never be accepted by this public seeder.
+        string[] unsafeDefaults = { "Admin123!", "Manager123!", "Reception123!", "Borrower123!" };
+        if (passwords.Values.Any(password => unsafeDefaults.Contains(password, StringComparer.Ordinal)))
+            throw new InvalidOperationException(
+                "The local Development passwords are not permitted for Azure demo accounts. " +
+                "Configure new unique passwords instead.");
+
+        if (passwords.Values.Distinct(StringComparer.Ordinal).Count() != credentials.Length)
+            throw new InvalidOperationException("Each LibraryDemoSeed account must have a DIFFERENT password.");
+
+        // Identity uses this AppDbContext, so the transaction also protects user/role writes.
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        foreach (var account in credentials)
+        {
+            if (account.Role == AppRoles.Borrower)
+            {
+                if (account.Username == "borrower1")
+                    await EnsureProductionDemoBorrowerAsync(context, userManager,
+                        account.Username, passwords[account.Username],
+                        "demo.borrower1@example.test", "LIBDEMO000101", "Demo", "Borrower One");
+                else
+                    await EnsureProductionDemoBorrowerAsync(context, userManager,
+                        account.Username, passwords[account.Username],
+                        "demo.borrower2@example.test", "LIBDEMO000102", "Demo", "Borrower Two");
+            }
+            else
+            {
+                var email = account.Username == "admin"
+                    ? configuration["LibraryDemoSeed:AdminEmail"]?.Trim()
+                    : null;
+                await EnsureProductionDemoStaffAsync(userManager,
+                    account.Username, passwords[account.Username], account.FullName, account.Role, email);
+            }
+        }
+        await transaction.CommitAsync();
+
+        // Never log credentials (and do not leave the opt-in passwords on Azure after setup).
+        logger.LogWarning("Production demo account seeding completed. " +
+            "Disable LibraryDemoSeed__Enabled and delete its password settings from App Service now.");
+    }
+
+    private static async Task EnsureProductionDemoStaffAsync(
+        UserManager<ApplicationUser> users, string username, string password,
+        string fullName, string role, string? email)
+    {
+        var existing = await users.FindByNameAsync(username);
+        if (existing is not null)
+        {
+            if (!await users.IsInRoleAsync(existing, role))
+                throw new InvalidOperationException(
+                    $"The username '{username}' already exists without role '{role}'. " +
+                    "Refusing to elevate an unrelated account. Resolve the collision manually.");
+            return; // Never change an existing password or email during demo seeding.
+        }
+
+        if (!string.IsNullOrWhiteSpace(email) && await users.FindByEmailAsync(email) is not null)
+            throw new InvalidOperationException($"Demo staff email is already assigned to another user: {username}.");
+
+        var user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(), UserName = username, FullName = fullName,
+            Email = string.IsNullOrWhiteSpace(email) ? null : email,
+            LockoutEnabled = true
+        };
+        ThrowIfFailed(await users.CreateAsync(user, password), $"create production demo '{username}'");
+        ThrowIfFailed(await users.AddToRoleAsync(user, role), $"assign role for '{username}'");
+    }
+
+    private static async Task EnsureProductionDemoBorrowerAsync(
+        AppDbContext context, UserManager<ApplicationUser> users,
+        string username, string password, string email,
+        string membershipCode, string firstName, string lastName)
+    {
+        var user = await users.FindByNameAsync(username);
+        if (user is not null)
+        {
+            if (!await users.IsInRoleAsync(user, AppRoles.Borrower) ||
+                !string.Equals(user.Email, email, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException(
+                    $"Demo username '{username}' belongs to a different account; " +
+                    "refusing to modify that account.");
+        }
+        else
+        {
+            if (await users.FindByEmailAsync(email) is not null)
+                throw new InvalidOperationException($"The demo borrower email is already used: '{username}'.");
+            if (await context.Borrowers.AnyAsync(b => b.Email == email || b.MembershipCode == membershipCode))
+                throw new InvalidOperationException($"The demo borrower identity or membership code already exists: '{username}'.");
+
+            user = new ApplicationUser
+            {
+                Id = Guid.NewGuid(), UserName = username, Email = email,
+                FullName = $"{firstName} {lastName}", LockoutEnabled = true
+            };
+            ThrowIfFailed(await users.CreateAsync(user, password), $"create production demo '{username}'");
+            ThrowIfFailed(await users.AddToRoleAsync(user, AppRoles.Borrower), $"assign borrower role for '{username}'");
+        }
+
+        var existingBorrower = await context.Borrowers.SingleOrDefaultAsync(b => b.IdentityUserId == user.Id);
+        if (existingBorrower is not null)
+        {
+            if (existingBorrower.MembershipCode != membershipCode)
+                throw new InvalidOperationException(
+                    $"'{username}' already has a different member record; refusing to overwrite it.");
+            return;
+        }
+        if (await context.Borrowers.AnyAsync(b => b.Email == email || b.MembershipCode == membershipCode))
+            throw new InvalidOperationException(
+                $"Demo email or member code is in use by another borrower: '{username}'.");
+
+        context.Borrowers.Add(new Borrower
+        {
+            IdentityUserId = user.Id, MembershipCode = membershipCode,
+            FirstName = firstName, LastName = lastName, Email = email,
+            Phone = "0400000000", Address = "1 Example Street"
+        });
+        await context.SaveChangesAsync();
+    }
+
     // These demonstration accounts are only created in Development. Do not reset existing passwords.
     // Old accounts and loan histories are deliberately left untouched.
     private static async Task EnsureDemoBorrowerAsync(AppDbContext db, UserManager<ApplicationUser> users,

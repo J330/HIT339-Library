@@ -1,0 +1,24 @@
+# Visual Studio and .NET build outputs
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Local-only configuration, secrets and machine-specific files
+.env
+.env.*
+*.pfx
+*.publishsettings
+appsettings.Local.json
+appsettings.*.local.json
+secrets.json
+
+# Local database backups and generated installers
+*.mdf
+*.ldf
+*.bak
+**/App_Data/Downloads/*.zip
+**/published/
