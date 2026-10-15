@@ -31,6 +31,7 @@ public sealed class CreateStaffAccountViewModel
 
 public sealed class StaffAccountListViewModel
 {
+    public Guid UserId { get; set; }
     public string FullName { get; set; } = "";
     public string Username { get; set; } = "";
     public string Email { get; set; } = "";
@@ -51,4 +52,22 @@ public sealed class StaffChangePasswordViewModel
     [Required, DataType(DataType.Password), Compare(nameof(NewPassword))]
     [Display(Name = "Confirm new password")]
     public string ConfirmPassword { get; set; } = "";
+}
+
+// Used only by administrators to issue a one-time replacement staff password.
+public sealed class ResetStaffPasswordViewModel
+{
+    [Required]
+    public Guid UserId { get; set; }
+
+    public string StaffUsername { get; set; } = "";
+    public string StaffFullName { get; set; } = "";
+
+    [Required, StringLength(100, MinimumLength = 12), DataType(DataType.Password)]
+    [Display(Name = "New temporary password")]
+    public string NewTemporaryPassword { get; set; } = "";
+
+    [Required, DataType(DataType.Password), Compare(nameof(NewTemporaryPassword))]
+    [Display(Name = "Confirm temporary password")]
+    public string ConfirmTemporaryPassword { get; set; } = "";
 }

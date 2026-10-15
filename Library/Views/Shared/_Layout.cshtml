@@ -118,10 +118,6 @@
                     }
                     @if (signedIn)
                     {
-                        @if (staff)
-                        {
-                            <a class="btn btn-link btn-sm" asp-controller="Account" asp-action="ChangePassword">Change password</a>
-                        }
                         <span class="nav-user-label" title="Signed in account">@User.Identity?.Name</span>
                         <form id="@(isBorrower && ViewContext.RouteData.Values["controller"]?.ToString() == "Kiosk" ? "kioskLogout" : null)"
                               asp-controller="Account" asp-action="Logout" method="post" class="m-0">
