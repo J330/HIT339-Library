@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using S379658_HIT339_Assignment2_Library.Database;
 using S379658_HIT339_Assignment2_Library.Services;
+using S379658_HIT339_Assignment2_Library.Roles;
 using S379658_HIT339_Assignment2_Library.Users.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -145,6 +146,30 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseRateLimiter();
 app.UseAuthentication();
+
+// Staff accounts issued by an administrator must change their temporary password
+// before using staff routes. Static files were already handled by UseStaticFiles.
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true &&
+        (context.User.IsInRole(AppRoles.Admin) || context.User.IsInRole(AppRoles.Manager) ||
+         context.User.IsInRole(AppRoles.Reception)) &&
+        !context.Request.Path.StartsWithSegments("/Account/ChangePassword", StringComparison.OrdinalIgnoreCase) &&
+        !context.Request.Path.StartsWithSegments("/Account/Logout", StringComparison.OrdinalIgnoreCase) &&
+        !context.Request.Path.StartsWithSegments("/Account/AccessDenied", StringComparison.OrdinalIgnoreCase) &&
+        !context.Request.Path.StartsWithSegments("/Home/Error", StringComparison.OrdinalIgnoreCase))
+    {
+        var users = context.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
+        var staffUser = await users.GetUserAsync(context.User);
+        if (staffUser?.MustChangePassword == true)
+        {
+            context.Response.Redirect("/Account/ChangePassword");
+            return;
+        }
+    }
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapControllers(); // Attribute-routed read-only JSON endpoints.

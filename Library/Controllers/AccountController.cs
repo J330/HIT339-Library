@@ -63,6 +63,11 @@ public class AccountController : Controller
             return View(model);
         }
 
+        if (user.MustChangePassword && (await _userManager.IsInRoleAsync(user, AppRoles.Admin) ||
+            await _userManager.IsInRoleAsync(user, AppRoles.Manager) ||
+            await _userManager.IsInRoleAsync(user, AppRoles.Reception)))
+            return RedirectToAction(nameof(ChangePassword));
+
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
         {
             return Redirect(returnUrl);
@@ -91,6 +96,54 @@ public class AccountController : Controller
         }
 
         return RedirectToAction("Index", "Home");
+    }
+
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.Manager + "," + AppRoles.Reception)]
+    [HttpGet]
+    public async Task<IActionResult> ChangePassword()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        ViewBag.FirstLogin = user.MustChangePassword;
+        return View(new StaffChangePasswordViewModel());
+    }
+
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.Manager + "," + AppRoles.Reception)]
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(StaffChangePasswordViewModel model)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        ViewBag.FirstLogin = user.MustChangePassword;
+        if (!ModelState.IsValid) return View(model);
+        if (model.NewPassword.Length < 12 || !model.NewPassword.Any(char.IsUpper) ||
+            !model.NewPassword.Any(char.IsLower) || !model.NewPassword.Any(char.IsDigit) ||
+            !model.NewPassword.Any(c => !char.IsLetterOrDigit(c)))
+        {
+            ModelState.AddModelError(nameof(model.NewPassword),
+                "Use at least 12 characters with uppercase, lowercase, a number and a symbol.");
+            return View(model);
+        }
+
+        var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors) ModelState.AddModelError("", error.Description);
+            return View(model);
+        }
+        user.MustChangePassword = false;
+        var updated = await _userManager.UpdateAsync(user);
+        if (!updated.Succeeded)
+        {
+            ModelState.AddModelError("", "Password updated, but the account update failed. Please contact an administrator.");
+            return View(model);
+        }
+        await _signInManager.RefreshSignInAsync(user);
+        if (await _userManager.IsInRoleAsync(user, AppRoles.Admin))
+            return RedirectToAction("Index", "StaffAccounts");
+        if (await _userManager.IsInRoleAsync(user, AppRoles.Manager))
+            return RedirectToAction("Index", "Managers");
+        return RedirectToAction("Index", "Borrowing");
     }
 
     [Authorize]

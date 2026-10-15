@@ -1,0 +1,57 @@
+@model S379658_HIT339_Assignment2_Library.ViewModels.CreateStaffAccountViewModel
+@{ ViewData["Title"] = "Create Staff Account"; }
+<div class="row justify-content-center py-3">
+    <div class="col-lg-8 col-xl-7">
+        <h1>Create staff account</h1>
+        <p class="text-muted">Only administrators can create administrators, managers and receptionists.</p>
+        <form asp-controller="StaffAccounts" asp-action="Create" method="post" class="card shadow-sm">
+            <div class="card-body p-4">
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label"></label>
+                    <input asp-for="FullName" class="form-control" autocomplete="name" />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Username" class="form-label"></label>
+                        <input asp-for="Username" class="form-control" autocomplete="off" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" type="email" class="form-control" autocomplete="off" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Role" class="form-label"></label>
+                    <select asp-for="Role" class="form-select">
+                        <option value="Reception">Receptionist</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Admin">Administrator</option>
+                    </select>
+                    <span asp-validation-for="Role" class="text-danger"></span>
+                </div>
+                <div class="alert alert-info" role="note">Provide a unique temporary password (12+ characters, upper/lowercase, number and symbol). Share it privately; the new staff member must change it at first login.</div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="TemporaryPassword" class="form-label"></label>
+                        <input asp-for="TemporaryPassword" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="TemporaryPassword" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmPassword" class="form-label"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">Create staff account</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
