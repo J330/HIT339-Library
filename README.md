@@ -7,6 +7,12 @@
 This repository contains the expanded Library Management System, including its kiosk and public catalogue API, multi-branch inventory, reservations and waitlists, simulated notifications, media imports, and manager analytics and exports. The instructions below explain how to download and run the **`.slnx` solution locally**, navigate the features, prepare multi-branch demonstration data and manually test the integrations.
 
 > **Local vs cloud:** Opening the solution in Visual Studio runs a **local ASP.NET Core website**. By default it uses a separate SQL Server LocalDB database, **not** the hosted Azure SQL database. The optional Windows desktop client is a separate, cloud-connected application.
+> 
+### Hosted Azure demonstration: startup time
+
+**Please allow approximately 5 minutes when first opening the hosted website after it has been idle or restarted.** Azure App Service may need to start the application again, so the first page load can be slower than usual. During startup, you may temporarily encounter an **HTTP 500 (Internal Server Error)** or another loading error.
+
+If the site does not load immediately, **wait around 5 minutes and then refresh the page** before trying again. You do not need to run Visual Studio or the `.slnx` solution to use the hosted demonstration. If the site continues to return errors after waiting, the problem may not be a normal startup delay; check Azure App Service status and application logs or contact the project maintainer.
 
 ## 1. Requirements
 
