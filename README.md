@@ -208,4 +208,3 @@ Additional background notes exist in `Library/SECTION_1_KIOSK_AND_API.md`, `Libr
 
 ---
 
-**Assignment deliverable:** The Git repository linked above contains the expanded .NET 10 MVC solution. This README explains how to **download and launch the `.slnx`, navigate the new modules, seed multi-branch sample data and verify the integrations** through reproducible manual tests.
